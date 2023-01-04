@@ -42,6 +42,8 @@ int UDPBeaon::SendMessage(json message)
     std::time_t end_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     message.emplace("Time", std::ctime(&end_time));
     message.emplace("Emitter", FindIp()[0]);
+    message.emplace("ListeningPort", 50555);
+    message.emplace("EmitPort", 50556);
     struct addrinfo hints;
     memset(&hints, 0x00, sizeof(hints));
     hints.ai_family = AF_INET;
