@@ -8,10 +8,10 @@ SRC_DIR := ./XplaneServer/src
 
 
 $(BUILD_DIR)/mac.xpl : $(BUILD_DIR)/main.o $(BUILD_DIR)/UDPBeacon.o $(BUILD_DIR)/UDPServer.o $(BUILD_DIR)/NetworkUtils.o\
-				$(BUILD_DIR)/Logger.o $(BUILD_DIR)/Dataref.o | $(BUILD_DIR)
+				$(BUILD_DIR)/Logger.o $(BUILD_DIR)/Dataref.o build/DatarefManager.o | $(BUILD_DIR)
 
 	g++ $(CXX_FLAGS) -m64 -dynamiclib -Wl, $(BUILD_DIR)/main.o $(BUILD_DIR)/UDPBeacon.o $(BUILD_DIR)/UDPServer.o $(BUILD_DIR)/NetworkUtils.o \
-	$(BUILD_DIR)/Logger.o $(BUILD_DIR)/Dataref.o -o build/mac.xpl $(FRAMEWORK)
+	$(BUILD_DIR)/Logger.o $(BUILD_DIR)/Dataref.o build/DatarefManager.o -o build/mac.xpl $(FRAMEWORK)
 
 $(BUILD_DIR)/main.o : $(SRC_DIR)/main.cpp | $(BUILD_DIR)
 	g++ -c $(CXX_FLAGS) $(SRC_DIR)/main.cpp -o build/main.o
@@ -31,6 +31,9 @@ $(BUILD_DIR)/Logger.o : $(SRC_DIR)/Tools/Logger.cpp $(SRC_DIR)/Tools/Logger.h | 
 $(BUILD_DIR)/Dataref.o : $(SRC_DIR)/Datarefs/Dataref.cpp $(SRC_DIR)/Datarefs/Dataref.h $(SRC_DIR)/Datarefs/AbstractDataref.h | $(BUILD_DIR)
 	g++ -c $(CXX_FLAGS) $(SRC_DIR)/Datarefs/Dataref.cpp -o build/Dataref.o
 
+$(BUILD_DIR)/DatarefManager.o : $(SRC_DIR)/Datarefs/DatarefManager.cpp $(SRC_DIR)/Datarefs/DatarefManager.h $(SRC_DIR)/Datarefs/AbstractDataref.h | $(BUILD_DIR)
+	g++ -c $(CXX_FLAGS) $(SRC_DIR)/Datarefs/DatarefManager.cpp -o build/DatarefManager.o
+
 # $(BUILD_DIR)/FFDataref.o : $(SRC_DIR)/Datarefs/FFDataref.cpp $(SRC_DIR)/Datarefs/FFDataref.h $(SRC_DIR)/Datarefs/AbstractDataref.h | $(BUILD_DIR)
 # 	g++ -c $(CXX_FLAGS) $(SRC_DIR)/Datarefs/FFDataref.cpp -o build/FFDataref.o
 
@@ -39,3 +42,6 @@ publish:
 
 $(BUILD_DIR):
 	mkdir build/
+
+clean:
+	rm -r ./build/

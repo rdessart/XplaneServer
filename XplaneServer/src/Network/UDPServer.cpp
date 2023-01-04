@@ -54,29 +54,36 @@ int UDPServer::SendMessage(json message)
         static_cast<int>(_targetAddress->ai_addrlen));
 }
 
-json UDPServer::ReceiveMessage()
+void UDPServer::ReceiveMessage(DatarefManager manager)
 {
     fd_set read;
     read = master;
-    if (select(static_cast<int>(m_maxSocket) + 1, &read, 0, 0, 0))
+    while(1)
     {
-        m_logger.Log("select() has failed " + std::to_string(GETSOCKETERRNO()));
-        return json();
-    }
-
-    if (FD_ISSET(_socket, &read))
-    {
-        struct sockaddr_storage cliAddr;
-        socklen_t clientLen = sizeof(cliAddr);
-
-        char data[10240];
-        int received = recvfrom(_socket, data, 10240, 0, (struct sockaddr*)&cliAddr, &clientLen);
-        if (received < 1)
+        int res = select(static_cast<int>(m_maxSocket) + 1, &read, 0, 0, nullptr);
+        if (res < 0)
         {
-            m_logger.Log("recvfrom() has failed " + std::to_string(GETSOCKETERRNO()));
-            return json();
+            m_logger.Log("select() has failed " + std::to_string(GETSOCKETERRNO()));
+            continue;
         }
-        return json::parse(data);
+        else if(res == 0) 
+        {
+            continue;
+        }
+        if (FD_ISSET(_socket, &read))
+        {
+            struct sockaddr_storage cliAddr;
+            socklen_t clientLen = sizeof(cliAddr);
+
+            char data[10240];
+            int received = recvfrom(_socket, data, 10240, 0, (struct sockaddr*)&cliAddr, &clientLen);
+            if (received < 1)
+            {
+                m_logger.Log("recvfrom() has failed " + std::to_string(GETSOCKETERRNO()));
+                continue;
+            }
+            manager.AddMessageToQueue(json::parse(data));
+        }
     }
-    return json();
+    return;
 }

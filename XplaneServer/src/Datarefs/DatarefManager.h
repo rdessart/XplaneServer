@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <vector>
 #include <map>
@@ -26,11 +28,14 @@ public:
 
     AbstractDataref* GetDatarefByName(std::string name);
     void AddMessageToQueue(json j);
+    std::queue<json> GetQueue();
+    Logger GetLogger();
+    bool isFF320Api();
 
 protected:
     Logger m_logger = Logger("XPLMServer.log", "DatarefManager", false);
     std::map<std::string, AbstractDataref*> _datarefMap;
     SharedValuesInterface* m_ff320;
     bool _isFF320Enable = false;
-    std::queue<json> _messageQueue;
+    std::queue<json> m_messageQueue;
 };

@@ -3,6 +3,13 @@
 void Callback(double step, void* tag)
 {
 	DatarefManager* cm = (DatarefManager*)tag;
+    std::queue<json> messageQueue = cm->GetQueue();
+    while(messageQueue.size() > 0)
+    {
+        json message = messageQueue.front();
+        messageQueue.pop();
+        cm->GetLogger().Log(message.dump());
+    }
 }
 
 DatarefManager::DatarefManager(bool enableFlightFactorAPI) : 
@@ -27,20 +34,70 @@ DatarefManager::DatarefManager(bool enableFlightFactorAPI) :
         unsigned int ffAPIdataversion = m_ff320->DataVersion();
         m_logger.Log("[FF320API] Version : " + std::to_string(ffAPIdataversion));
         _isFF320Enable = true;
+        m_ff320->DataAddUpdate(Callback, this);
     }
+
 }
 
 int DatarefManager::AddDataref(std::string name, AbstractDataref *dataref)
 {
-    return 0;
+    if(_datarefMap.contains(name))
+    {
+        m_logger.Log("Caution dataref storage already contain a dataref nammed : '" + name + "' overriding");
+    }
+    _datarefMap.emplace(name, dataref);
+    m_logger.Log("Added dataref: '" + name + "' overriding");
+    return _datarefMap.size();
 }
 
 int DatarefManager::AddDataref(std::string path, std::string name, std::string conversionFactor, Dataref::Type type)
 {
-    return 0;
+    if(_datarefMap.contains(name))
+    {
+        m_logger.Log("Caution dataref storage already contain a dataref nammed : '" + name + "' overriding");
+    }
+    AbstractDataref* dataref;
+    if(path.find(".") != std::string::npos) //it's an FFDataref
+    {
+        dataref = new Dataref();
+        dataref->Load(path);
+        if(type == Dataref::Type::Unknown){
+            ((Dataref*)dataref)->LoadType();
+        }
+        else{
+            ((Dataref*)dataref)->SetType(type);
+        }
+    }
+    _datarefMap.emplace(name, dataref);
+    return _datarefMap.size();
 }
 
 AbstractDataref *DatarefManager::GetDatarefByName(std::string name)
 {
-    return nullptr;
+    if(!_datarefMap.contains(name))
+    {
+        m_logger.Log("dataref nammed: '" + name + "' NOT FOUND!");
+        return nullptr;
+    }
+    return _datarefMap.at(name);
+}
+
+void DatarefManager::AddMessageToQueue(json j)
+{
+    m_messageQueue.emplace(j);
+}
+
+std::queue<json> DatarefManager::GetQueue()
+{
+    return std::queue<json>(m_messageQueue);
+}
+
+Logger DatarefManager::GetLogger()
+{
+    return m_logger;
+}
+
+bool DatarefManager::isFF320Api()
+{
+    return _isFF320Enable;
 }
