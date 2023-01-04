@@ -11,7 +11,7 @@ public:
     ~UDPServer();
     int Initalize();
     int SendMessage(json message);
-    void ReceiveMessage(DatarefManager manager);
+    void ReceiveMessage(DatarefManager* manager);
 protected:
 #ifdef IBM
     WSADATA _wsa = { 0 };

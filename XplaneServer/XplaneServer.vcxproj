@@ -167,6 +167,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Datarefs\DatarefManager.cpp" />
     <ClCompile Include="src\Network\NetworkUtils.cpp" />
     <ClCompile Include="src\Network\UDPServer.cpp" />
     <ClCompile Include="src\Tools\Logger.cpp" />
@@ -175,6 +176,7 @@
     <ClCompile Include="src\Network\UDPBeacon.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Datarefs\DatarefManager.h" />
     <ClInclude Include="src\Network\NetworkUtils.h" />
     <ClInclude Include="src\Network\IServer.h" />
     <ClInclude Include="src\Network\UDPServer.h" />
@@ -182,6 +184,7 @@
     <ClInclude Include="src\Datarefs\AbstractDataref.h" />
     <ClInclude Include="src\Datarefs\Dataref.h" />
     <ClInclude Include="src\Network\UDPBeacon.h" />
+    <ClInclude Include="src\Tools\SharedValue.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

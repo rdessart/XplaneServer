@@ -54,7 +54,7 @@ int UDPServer::SendMessage(json message)
         static_cast<int>(_targetAddress->ai_addrlen));
 }
 
-void UDPServer::ReceiveMessage(DatarefManager manager)
+void UDPServer::ReceiveMessage(DatarefManager* manager)
 {
     fd_set read;
     read = master;
@@ -82,7 +82,10 @@ void UDPServer::ReceiveMessage(DatarefManager manager)
                 m_logger.Log("recvfrom() has failed " + std::to_string(GETSOCKETERRNO()));
                 continue;
             }
-            manager.AddMessageToQueue(json::parse(data));
+            std::string strData(data);
+            strData = strData.substr(0,received);
+            json message = json::parse(strData);
+            manager->AddMessageToQueue(message);
         }
     }
     return;

@@ -1,19 +1,73 @@
 #include "DatarefManager.h"
 
+enum class OperationsEnum
+{
+    Unknown,
+    Speak,
+    SetData,
+    GetData,
+    RegisterData,
+    SetRegData,
+    GetRegData
+};
+
+OperationsEnum GetOperation(std::string ops)
+{
+    static const std::map<std::string, OperationsEnum> operationsStrings{
+        {"speak", OperationsEnum::Speak},
+        {"setdata", OperationsEnum::SetData},
+        {"getdata", OperationsEnum::GetData},
+        {"registerdata", OperationsEnum::RegisterData},
+        {"setregdata", OperationsEnum::SetRegData},
+        {"getregdata", OperationsEnum::GetRegData},
+    };
+    std::transform(ops.begin(), ops.end(), ops.begin(),
+        [](unsigned char c) { return std::tolower(c); });
+    auto itr = operationsStrings.find(ops);
+    if (itr != operationsStrings.end())
+    {
+        return itr->second;
+    }
+    return OperationsEnum::Unknown;
+}
+
 void Callback(double step, void* tag)
 {
 	DatarefManager* cm = (DatarefManager*)tag;
-    std::queue<json> messageQueue = cm->GetQueue();
-    while(messageQueue.size() > 0)
+    while(cm->GetMessageQueueLenght() > 0)
     {
-        json message = messageQueue.front();
-        messageQueue.pop();
-        cm->GetLogger().Log(message.dump());
+        json message = cm->GetNextMessage();
+        cm->GetLogger().Log("Message : '" + message.dump() + "'");
+        if (!message.contains("Operation")) continue;
+        OperationsEnum ops = GetOperation(message.value("Operation", ""));
+        switch (ops)
+        {
+        case OperationsEnum::Speak:
+            XPLMSpeakString(message.value("Text", "").c_str());
+            break;
+        case OperationsEnum::SetData:
+            cm->GetLogger().Log("Setting dataref");
+            break;
+        case OperationsEnum::GetData:
+            cm->GetLogger().Log("Getting dataref");
+            break;
+        case OperationsEnum::RegisterData:
+            cm->GetLogger().Log("Registering dataref");
+            break;
+        case OperationsEnum::SetRegData:
+            cm->GetLogger().Log("Setting registered dataref");
+            break;
+        case OperationsEnum::GetRegData:
+            cm->GetLogger().Log("Getting registered dataref");
+            break;
+        default:
+            break;
+        }
     }
 }
 
-DatarefManager::DatarefManager(bool enableFlightFactorAPI) : 
-    _isFF320Enable(false)
+DatarefManager::DatarefManager(bool enableFlightFactorAPI) :
+    _isFF320Enable(false), m_ff320(0)
 {
     if(enableFlightFactorAPI)
     {
@@ -39,7 +93,7 @@ DatarefManager::DatarefManager(bool enableFlightFactorAPI) :
 
 }
 
-int DatarefManager::AddDataref(std::string name, AbstractDataref *dataref)
+std::size_t DatarefManager::AddDataref(std::string name, AbstractDataref *dataref)
 {
     if(_datarefMap.contains(name))
     {
@@ -50,7 +104,7 @@ int DatarefManager::AddDataref(std::string name, AbstractDataref *dataref)
     return _datarefMap.size();
 }
 
-int DatarefManager::AddDataref(std::string path, std::string name, std::string conversionFactor, Dataref::Type type)
+std::size_t  DatarefManager::AddDataref(std::string path, std::string name, std::string conversionFactor, Dataref::Type type)
 {
     if(_datarefMap.contains(name))
     {
@@ -84,7 +138,26 @@ AbstractDataref *DatarefManager::GetDatarefByName(std::string name)
 
 void DatarefManager::AddMessageToQueue(json j)
 {
-    m_messageQueue.emplace(j);
+    gLock.lock();
+        m_messageQueue.emplace(j);
+    gLock.unlock();
+}
+
+json DatarefManager::GetNextMessage()
+{
+    gLock.lock();
+        json message = m_messageQueue.back();
+        m_messageQueue.pop();
+    gLock.unlock();
+    return message;
+}
+
+std::size_t DatarefManager::GetMessageQueueLenght()
+{
+    gLock.lock();
+    std::size_t lenght = m_messageQueue.size();
+    gLock.unlock();
+    return lenght;
 }
 
 std::queue<json> DatarefManager::GetQueue()
