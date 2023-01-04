@@ -1,6 +1,8 @@
 #pragma once
 
 #include "IServer.h"
+#include "NetworkUtils.h"
+
 #include "../Tools/Logger.h"
 
 class UDPBeaon : public IServer

@@ -167,6 +167,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Network\NetworkUtils.cpp" />
     <ClCompile Include="src\Network\UDPServer.cpp" />
     <ClCompile Include="src\Tools\Logger.cpp" />
     <ClCompile Include="src\Datarefs\Dataref.cpp" />
@@ -174,6 +175,7 @@
     <ClCompile Include="src\Network\UDPBeacon.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Network\NetworkUtils.h" />
     <ClInclude Include="src\Network\IServer.h" />
     <ClInclude Include="src\Network\UDPServer.h" />
     <ClInclude Include="src\Tools\Logger.h" />

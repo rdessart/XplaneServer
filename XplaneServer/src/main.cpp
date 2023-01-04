@@ -11,6 +11,7 @@
 
 #include <XPLM/XPLMDataAccess.h>
 #include <XPLM/XPLMProcessing.h>
+#include <XPLM/XPLMUtilities.h>
 
 #include "Datarefs/Dataref.h"
 #include "Network/UDPBeacon.h"
@@ -105,11 +106,17 @@ static float BeaconCallback(float elapsed, float elpasedFlightLoop, int counter,
 	d2.DatarefType = DatarefType::XPLMDataref;
 	d2.Load("sim/aircraft/view/acf_descrip");
 	d2.SetType(Dataref::Type::Data);
+	int sim, sdk;
+	XPLMHostApplicationID id;
+	XPLMGetVersions(&sim, &sdk, &id);
 	json j;
 	j.emplace("Ops", "Beacon");
 	j.emplace("Author", d1.GetValue());
 	j.emplace("Description", d2.GetValue());
-	//beacon.SendMessage(j);
+	j.emplace("Simulator", "X-Plane");
+	j.emplace("SimulatorVersion", sim);
+	j.emplace("SimulatorSDKVersion", sdk);
+
 	auto futptr = std::make_shared<std::future<void>>();
 	*futptr = std::async(std::launch::async,
 			[futptr, j]() {

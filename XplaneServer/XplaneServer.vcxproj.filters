@@ -30,6 +30,9 @@
     <ClCompile Include="src\Network\UDPServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Network\NetworkUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Datarefs\Dataref.h">
@@ -48,6 +51,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Network\IServer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Network\NetworkUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
