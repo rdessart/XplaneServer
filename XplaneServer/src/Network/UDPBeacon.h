@@ -14,4 +14,5 @@ public:
     json ReceiveMessage();
 protected:
     Logger m_logger = Logger("XPLMServer.log", "UDPBeacon", true);
+    std::vector<std::string> _ips;
 };

@@ -15,7 +15,7 @@ std::vector<std::string> FindIp()
         if (ifloop->ifa_addr->sa_family != AF_INET) continue;
         s4 = (struct sockaddr_in*)(ifloop->ifa_addr);
         if (s4->sin_addr.s_addr == loopback) continue;
-        inet_ntop(ifloop->ifa_addr->sa_family, (void*)&(s4->sin_addr), buf, sizeof(buf)) == NULL;
+        inet_ntop(ifloop->ifa_addr->sa_family, (void*)&(s4->sin_addr), buf, sizeof(buf))/* == NULL*/;
         ips.push_back(std::string(buf));
     }
     freeifaddrs(addrs);

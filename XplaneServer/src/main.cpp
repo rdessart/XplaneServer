@@ -137,7 +137,7 @@ void SendBeacon(json message)
 static float BeaconCallback(float elapsed, float elpasedFlightLoop, int counter, void* refcounter)
 {
 	json j;
-	j.emplace("Ops", "Beacon");
+	j.emplace("Operation", "Beacon");
 	j.emplace("Author", AcfAuthor);
 	j.emplace("Description", AcfDescription);
 	j.emplace("Simulator", "X-Plane");

@@ -2,6 +2,7 @@
 
 UDPBeaon::UDPBeaon()
 {
+    _ips = FindIp();
 }
 
 int UDPBeaon::Initalize()
@@ -41,21 +42,34 @@ int UDPBeaon::SendMessage(json message)
 {
     std::time_t end_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     message.emplace("Time", std::ctime(&end_time));
-    message.emplace("Emitter", FindIp()[0]);
+    message.emplace("IPAddress", FindIp()[0]);
     message.emplace("ListeningPort", 50555);
     message.emplace("EmitPort", 50556);
     struct addrinfo hints;
-    memset(&hints, 0x00, sizeof(hints));
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_flags = AI_PASSIVE;
-    struct addrinfo* targetAddress;
-    getaddrinfo("192.168.0.255", "50888", &hints, &targetAddress);
+    struct sockaddr_in ipTest;
+    if(_ips[0] != "127.0.0.1")
+    {
+        ipTest.sin_addr.s_addr = INADDR_BROADCAST;
+    }
+    else
+    {
+        sockaddr_in send_address = {};
+	    int res = inet_pton(AF_INET, "127.0.0.1", &ipTest.sin_addr.s_addr);
+    }
+    ipTest.sin_port = htons(50888);
+    ipTest.sin_family = AF_INET;
+
+    // memset(&hints, 0x00, sizeof(hints));
+    // hints.ai_family = AF_INET;
+    // hints.ai_socktype = SOCK_DGRAM;
+    // hints.ai_flags = AI_PASSIVE;
+    
+    // getaddrinfo("192.168.0.255", "50888", &hints, &targetAddress);
     return sendto(_socket,
         message.dump().c_str(), 
         static_cast<int>(message.dump().length()),
-        0, targetAddress->ai_addr,
-        static_cast<int>(targetAddress->ai_addrlen));
+        0, (sockaddr*)&ipTest,
+        static_cast<int>(sizeof(ipTest)));
 }
 
 json UDPBeaon::ReceiveMessage()

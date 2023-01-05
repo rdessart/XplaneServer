@@ -30,12 +30,15 @@ bool Dataref::Load(std::string path)
 {
 	m_link = path;
 	m_dataref = XPLMFindDataRef(path.c_str());
+	m_logger.Log("Loading Dataref '" + path + "'");
 	if (m_dataref == nullptr)
 	{
 		m_logger.Log("Loading Dataref '" + path + "' : FAILED", Logger::Severity::WARNING);
 		return false;
 	}
+	m_logger.Log("Loaded Dataref '" + path + "'");
 	m_type = this->LoadType();
+	m_logger.Log("Loaded Type '" + std::to_string((int)m_type) + "'");
 	return true;
 }
 
@@ -105,8 +108,12 @@ std::string Dataref::GetValue()
 		value = std::to_string(XPLMGetDataf(m_dataref) * (float)std::stod(m_conversionFactor));
 		break;
 	case Dataref::Type::Double:
-		value = std::to_string(XPLMGetDatad(m_dataref) * std::stod(m_conversionFactor));
+	{
+		double val = XPLMGetDatad(m_dataref);
+		val *= std::stod(m_conversionFactor);
+		value = std::to_string(val);
 		break;
+	}
 	case Dataref::Type::FloatArray:
 	{
 		int arraySize = XPLMGetDatavf(m_dataref, nullptr, 0, 0);
@@ -161,6 +168,7 @@ void Dataref::SetValue(std::string value)
 {
 	if (m_dataref == NULL || !this->CanWrite())
 	{
+		m_logger.Log("Dataref is null", Logger::Severity::WARNING);
 		return;
 	}
 	switch (m_type)
@@ -169,29 +177,35 @@ void Dataref::SetValue(std::string value)
 		break;
 	case Dataref::Type::Int:
 	{
+		m_logger.Log("Dataref is of type int", Logger::Severity::WARNING);
 		int val = std::stoi(value) / (int)std::stod(m_conversionFactor);
 		XPLMSetDatai(m_dataref, val);
 		break;
 	}
 	case Dataref::Type::Float:
 	{
+		m_logger.Log("Dataref is of type float", Logger::Severity::WARNING);
 		float val = std::stof(value) / (float)std::stod(m_conversionFactor);
 		XPLMSetDataf(m_dataref, val);
 		break;
 	}
 	case Dataref::Type::Double:
 	{
+		m_logger.Log("Dataref is of type double", Logger::Severity::TRACE);
 		double val = std::stod(value) / std::stod(m_conversionFactor);
+		m_logger.Log("Value: " + std::to_string(val), Logger::Severity::TRACE);
 		XPLMSetDatad(m_dataref, val);
 		break;
 	}
 	case Dataref::Type::FloatArray:
 	{
+		m_logger.Log("Dataref is of type floatarray", Logger::Severity::WARNING);
 		int res = this->setFloatArrayFromJson(0, value);
 		break;
 	}
 	case Dataref::Type::IntArray:
 	{
+		m_logger.Log("Dataref is of type intarray", Logger::Severity::WARNING);
 		int res = this->setIntArrayFromJson(0, value);
 		break;
 	}

@@ -18,8 +18,6 @@ using json = nlohmann::json;
 
 void Callback(double step, void* tag);
 
-
-
 class DatarefManager{
 public:
     DatarefManager(bool enableFlightFactorAPI=false);

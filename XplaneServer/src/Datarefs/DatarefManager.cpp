@@ -46,8 +46,24 @@ void Callback(double step, void* tag)
             XPLMSpeakString(message.value("Text", "").c_str());
             break;
         case OperationsEnum::SetData:
+        {
             cm->GetLogger().Log("Setting dataref");
+            if(!message.contains("Link")) continue;
+            std::string value = message.value("Value", "");
+            std::string link = message.value("Link", "");
+            cm->GetLogger().Log("Link : '" + link + "'");
+            cm->GetLogger().Log("Value : '" + value + "'");
+            Dataref* d = new Dataref();
+            d->Load(link);
+            if(message.contains("Type"))
+            {
+                std::string type = message.at("Type").get<std::string>();
+                d->SetType(type);
+            }
+            d->SetValue(value);
+            cm->GetLogger().Log("Value: " + d->GetValue() + "!");
             break;
+        }
         case OperationsEnum::GetData:
             cm->GetLogger().Log("Getting dataref");
             break;
