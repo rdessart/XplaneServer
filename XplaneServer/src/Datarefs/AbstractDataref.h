@@ -1,5 +1,8 @@
 #pragma once
 #include <string>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 enum class DatarefType {
     Abstract = 0,

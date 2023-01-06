@@ -377,3 +377,23 @@ int Dataref::setIntArrayFromJson(int offset, std::string value)
 	XPLMSetDatavi(m_dataref, data.data(), offset, maxSize);
 	return EXIT_SUCCESS;
 }
+
+void Dataref::FromJson(json data)
+{
+	m_link = data["Link"];
+	m_conversionFactor = data.value("ConversionFactor", "1.0");
+	this->SetType(data.value("Type", "Unknown"));
+	m_dataref = XPLMFindDataRef(m_link.c_str());
+	if(!this->IsGood())
+	{
+		m_logger.Log("Dataref: '" + m_link + "' is NOT Good()", Logger::Severity::CRITICAL);
+	}
+	if(!this->CanWrite())
+	{
+		m_logger.Log("Dataref: '" + m_link + "' is READONLY", Logger::Severity::WARNING);
+	}
+	if(data.contains("Value"))
+	{
+		this->SetValue(data["Value"].dump());
+	}
+}

@@ -14,6 +14,8 @@
 
 using json = nlohmann::json;
 
+
+
 ///<summary>
 /// This class represent an X-Plane dataref in OOP format.
 ///</summary>
@@ -97,6 +99,7 @@ public:
 	///</summary>
 	///<param name="conversionFactor">The multiplication factor to be applied to the dataref on get and set (as a division)</param>
 	void SetConversionFactor(std::string conversionFactor);
+	void FromJson(json data);
 protected:
 	XPLMDataRef m_dataref;	/* Represent a void pointer locating the dataref as X - Plane SDK */
 	Dataref::Type m_type;	/* Represent the underlying data type of the dataref */
