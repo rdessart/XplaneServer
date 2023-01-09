@@ -1,8 +1,13 @@
 #include "UDPBeacon.h"
 
-UDPBeaon::UDPBeaon()
+UDPBeaon::UDPBeaon() : UDPBeaon("X.X.X.X")
+{
+}
+
+UDPBeaon::UDPBeaon(std::string ip)
 {
     _ips = FindIp();
+    m_ip = ip;
 }
 
 int UDPBeaon::Initalize()
@@ -42,7 +47,7 @@ int UDPBeaon::SendMessage(json message)
 {
     std::time_t end_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     message.emplace("Time", std::ctime(&end_time));
-    message.emplace("IPAddress", FindIp()[0]);
+    message.emplace("IPAddress", this->GetIPAddress());
     message.emplace("ListeningPort", 50555);
     message.emplace("EmitPort", 50556);
     struct addrinfo hints;
@@ -59,12 +64,6 @@ int UDPBeaon::SendMessage(json message)
     ipTest.sin_port = htons(50888);
     ipTest.sin_family = AF_INET;
 
-    // memset(&hints, 0x00, sizeof(hints));
-    // hints.ai_family = AF_INET;
-    // hints.ai_socktype = SOCK_DGRAM;
-    // hints.ai_flags = AI_PASSIVE;
-    
-    // getaddrinfo("192.168.0.255", "50888", &hints, &targetAddress);
     return sendto(_socket,
         message.dump().c_str(), 
         static_cast<int>(message.dump().length()),
@@ -75,4 +74,19 @@ int UDPBeaon::SendMessage(json message)
 json UDPBeaon::ReceiveMessage()
 {
     return json();
+}
+
+void UDPBeaon::SetIPAddress(std::string ip)
+{
+    gLock.lock();
+        m_ip = ip;
+    gLock.unlock();
+}
+
+std::string UDPBeaon::GetIPAddress()
+{
+    gLock.lock();
+        std::string ip = m_ip;
+    gLock.unlock();
+    return ip;
 }

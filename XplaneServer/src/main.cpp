@@ -12,6 +12,7 @@
 #include <XPLM/XPLMDataAccess.h>
 #include <XPLM/XPLMProcessing.h>
 #include <XPLM/XPLMUtilities.h>
+#include <XPLM/XPLMMenus.h>
 
 #include "Datarefs/DatarefManager.h"
 #include "Datarefs/Dataref.h"
@@ -21,6 +22,9 @@
 static float InitalizerCallback(float elapsed, float elpasedFlightLoop, int counter, void* refcounter);
 static float BeaconCallback(float elapsed, float elpasedFlightLoop, int counter, void* refcounter);
 static float RunCallback(float elapsed, float elpasedFlightLoop, int counter, void* refcounter);
+static void	MenuHandlerCallback(void* inMenuRef, void* inItemRef);
+
+std::map<int, std::string> IPMap;
 static UDPBeaon beacon;
 static XPLMFlightLoopID initalizerCallbackId;
 static XPLMFlightLoopID beaconCallbackId;
@@ -31,7 +35,7 @@ static std::string AcfAuthor;
 static std::string AcfDescription;
 static int SimVersion, SDKVersion;
 DatarefManager* manager;
-
+static XPLMMenuID eSkyInstructorMenu;
 
 PLUGIN_API int XPluginStart(char* outName, char* outSig, char* outDesc)
 {
@@ -39,6 +43,7 @@ PLUGIN_API int XPluginStart(char* outName, char* outSig, char* outDesc)
 	std::string name = "XPLMServer";
 	std::string sig = "eSkyStudio.Simulator.XPlaneServer";
 	std::string description = "Server for Xplane";
+
 #ifdef IBM
 	strcpy_s(outName, 256, name.c_str());
 	strcpy_s(outSig, 256, sig.c_str());
@@ -48,6 +53,12 @@ PLUGIN_API int XPluginStart(char* outName, char* outSig, char* outDesc)
 	strcpy(outSig, sig.c_str());
 	strcpy(outDesc, description.c_str());
 #endif
+
+	eSkyInstructorMenu = XPLMCreateMenu("eSkyInstructor", nullptr, 0, MenuHandlerCallback, 0);
+	if (eSkyInstructorMenu == NULL)
+	{
+		logger.Log("Unable to create eSkyInstructor Submenu");
+	}
 	XPLMCreateFlightLoop_t initalizerParameter;
 	initalizerParameter.structSize = sizeof(XPLMCreateFlightLoop_t);
 	initalizerParameter.phase = xplm_FlightLoop_Phase_BeforeFlightModel;
@@ -98,6 +109,25 @@ static float InitalizerCallback(float elapsed, float elpasedFlightLoop, int coun
 	d2.Load("sim/aircraft/view/acf_descrip");
 	d2.SetType(Dataref::Type::Data);
 
+	std::vector<std::string> ips = FindIp();
+	char menuId = 0;
+	for (auto& ip : ips)
+	{
+		int res = XPLMAppendMenuItem(eSkyInstructorMenu, ip.c_str(), (void*)menuId, 0);
+		if (res < 0)
+		{
+			logger.Log("Unable to add IP : '" + ip + "' to menu");
+			continue;
+		}
+		XPLMCheckMenuItem(eSkyInstructorMenu, menuId, xplm_Menu_Unchecked);
+		IPMap.emplace(res, ip);
+		menuId += 1;
+	}
+
+	XPLMCheckMenuItem(eSkyInstructorMenu, 0, xplm_Menu_Checked);
+
+	beacon.SetIPAddress(IPMap[0]);
+
 	AcfAuthor = d1.GetValue();
 	AcfDescription = d2.GetValue();
 	XPLMHostApplicationID id;
@@ -109,6 +139,8 @@ static float InitalizerCallback(float elapsed, float elpasedFlightLoop, int coun
 
 	res = server.Initalize();
 	logger.Log("UDP Server initalizer returned " + std::to_string(res));
+
+	
 
 	auto futptr = std::make_shared<std::future<void>>();
 	*futptr = std::async(std::launch::async, [futptr]() 
@@ -126,6 +158,8 @@ static float InitalizerCallback(float elapsed, float elpasedFlightLoop, int coun
 		XPLMFlightLoopID callbackId = XPLMCreateFlightLoop(&callbackParameter);
 		XPLMScheduleFlightLoop(callbackId, -1.0f, 1);
 	}
+
+
 	return 0;
 }
 
@@ -156,4 +190,16 @@ float RunCallback(float elapsed, float elpasedFlightLoop, int counter, void* ref
 {
 	Callback(0.0, manager);
 	return -1.0f;
+}
+
+void MenuHandlerCallback(void* inMenuRef, void* inItemRef)
+{
+	int id = (int)(inItemRef);
+	for(auto &kv : IPMap)
+	{
+		XPLMCheckMenuItem(eSkyInstructorMenu, kv.first, xplm_Menu_Unchecked);
+	}
+	XPLMCheckMenuItem(eSkyInstructorMenu, id, xplm_Menu_Checked);
+	beacon.SetIPAddress(IPMap[id]);
+	return;
 }
