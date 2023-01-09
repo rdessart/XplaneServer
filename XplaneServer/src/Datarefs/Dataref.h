@@ -9,6 +9,8 @@
 #include <XPLM/XPLMUtilities.h>
 
 #include "../Tools/Logger.h"
+#include "../Tools/Utils.h"
+
 #include "AbstractDataref.h"
 
 

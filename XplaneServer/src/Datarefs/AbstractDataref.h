@@ -17,6 +17,7 @@ public:
     virtual void SetValue(std::string value) = 0;
     virtual void SetConversionFactor(std::string conversionFactor) = 0;
     virtual bool Load(std::string path) = 0;
+    virtual void FromJson(json data) = 0;
 protected:
     std::string m_link;
     std::string m_conversionFactor;

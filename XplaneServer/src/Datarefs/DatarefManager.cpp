@@ -50,8 +50,18 @@ void Callback(double step, void* tag)
         {
             cm->GetLogger().Log("Setting dataref");
             if(!message.contains("Dataref")) continue;
-            Dataref d;
-            d.FromJson(message["Dataref"]);
+            AbstractDataref* d;
+            std::string link = message["Dataref"]["Link"].get<std::string>();
+            if( cm->isFF320Api() &&
+                link.find("Aircraft") != std::string::npos &&
+                link.find(".") != std::string::npos)
+            {
+                d = new FFDataref(cm->GetFF320Interface());
+            }
+            else {
+                d = new Dataref();
+            }
+            d->FromJson(message["Dataref"]);
             break;
         }
         case OperationsEnum::GetData:
@@ -179,4 +189,9 @@ Logger DatarefManager::GetLogger()
 bool DatarefManager::isFF320Api()
 {
     return _isFF320Enable;
+}
+
+SharedValuesInterface* DatarefManager::GetFF320Interface()
+{
+    return m_ff320;
 }

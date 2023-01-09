@@ -10,6 +10,7 @@
 #include <nlohmann/json.hpp>
 
 #include "AbstractDataref.h"
+#include "FFA320Dataref.h"
 #include "Dataref.h"
 #include "../Tools/SharedValue.h"
 #include "../Tools/Logger.h"
@@ -34,6 +35,7 @@ public:
     std::queue<json> GetQueue();
     Logger GetLogger();
     bool isFF320Api();
+    SharedValuesInterface* GetFF320Interface();
 
 protected:
     Logger m_logger = Logger("XPLMServer.log", "DatarefManager", false);
