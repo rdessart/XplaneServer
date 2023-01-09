@@ -178,7 +178,8 @@ void Dataref::SetValue(std::string value)
 	case Dataref::Type::Int:
 	{
 		m_logger.Log("Dataref is of type int", Logger::Severity::WARNING);
-		int val = std::stoi(value) / (int)std::stod(m_conversionFactor);
+		int val = std::stoi(value);
+		val /= (int)std::stod(m_conversionFactor);
 		XPLMSetDatai(m_dataref, val);
 		break;
 	}
@@ -394,6 +395,38 @@ void Dataref::FromJson(json data)
 	}
 	if(data.contains("Value"))
 	{
-		this->SetValue(data["Value"].dump());
+		//check if type is string or int/float/json
+		std::string value;
+		switch (data["Value"].type())
+		{
+		case json::value_t::string:
+			value = data["Value"].get<std::string>();
+			m_logger.Log("Type is string");
+			break;
+		case json::value_t::number_float:
+			value = std::to_string(data["Value"].get<float>());
+			m_logger.Log("Type is float");
+			break;
+		case json::value_t::number_integer:
+			value = std::to_string(data["Value"].get<int>());
+			m_logger.Log("Type is integer");
+			break;
+		case json::value_t::number_unsigned:
+			value = std::to_string(data["Value"].get<unsigned int>());
+			m_logger.Log("Type is unsigned integer");
+			break;
+		case json::value_t::object:
+			value = data["Value"].dump();
+			m_logger.Log("Type is json object");
+			break;
+		case json::value_t::array:
+			value = data["Value"].dump();
+			m_logger.Log("Type is array");
+			break;
+		default:
+			m_logger.Log("Type is NOT supported ('" + std::to_string((int)data["Value"].type()) + "')", Logger::Severity::CRITICAL);
+			break;
+		}
+		this->SetValue(value);
 	}
 }
