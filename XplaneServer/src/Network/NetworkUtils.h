@@ -5,6 +5,7 @@
 	#include <WinSock2.h>
 	#include <iostream>
 	#include <iphlpapi.h>
+	#include <WS2tcpip.h>
 	#pragma comment(lib, "IPHLPAPI.lib")
 #else
 	#include <unistd.h>
@@ -22,5 +23,12 @@
 #include <vector>
 #include <sstream>
 
-std::vector<std::string> FindIp();
+struct IPInfo {
+	std::string str_ip;
+	std::string str_subnet;
+	std::string str_broadcast;
+};
+
+
+std::vector<IPInfo> FindIp();
 

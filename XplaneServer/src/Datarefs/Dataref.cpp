@@ -7,7 +7,7 @@ Dataref::Dataref() :
 	m_link(""),
 	m_conversionFactor("1.0")
 {
-	DatarefType = DatarefType::XPLMDataref;
+	TypeDataref = DatarefType::XPLMDataref;
 }
 
 /* \brief Copy Constructor */

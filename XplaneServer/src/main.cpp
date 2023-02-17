@@ -6,6 +6,7 @@
 #include <string.h>
 #include <thread>
 #include <future>
+#include <cstdint>
 
 #include <nlohmann/json.hpp>
 
@@ -24,7 +25,7 @@ static float BeaconCallback(float elapsed, float elpasedFlightLoop, int counter,
 static float RunCallback(float elapsed, float elpasedFlightLoop, int counter, void* refcounter);
 static void	MenuHandlerCallback(void* inMenuRef, void* inItemRef);
 
-std::map<int, std::string> IPMap;
+std::map<int, IPInfo> IPMap;
 static UDPBeaon beacon;
 static XPLMFlightLoopID initalizerCallbackId;
 static XPLMFlightLoopID beaconCallbackId;
@@ -100,23 +101,23 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, int inMessage, voi
 static float InitalizerCallback(float elapsed, float elpasedFlightLoop, int counter, void* refcounter)
 {
 	Dataref d1;
-	d1.DatarefType = DatarefType::XPLMDataref;
+	d1.TypeDataref = DatarefType::XPLMDataref;
 	d1.Load("sim/aircraft/view/acf_author");
 	d1.SetType(Dataref::Type::Data);
 	
 	Dataref d2;
-	d2.DatarefType = DatarefType::XPLMDataref;
+	d2.TypeDataref = DatarefType::XPLMDataref;
 	d2.Load("sim/aircraft/view/acf_descrip");
 	d2.SetType(Dataref::Type::Data);
 
-	std::vector<std::string> ips = FindIp();
+	std::vector<IPInfo> ips = FindIp();
 	char menuId = 0;
 	for (auto& ip : ips)
 	{
-		int res = XPLMAppendMenuItem(eSkyInstructorMenu, ip.c_str(), (void*)menuId, 0);
+		int res = XPLMAppendMenuItem(eSkyInstructorMenu, ip.str_ip.c_str(), (void*)menuId, 0);
 		if (res < 0)
 		{
-			logger.Log("Unable to add IP : '" + ip + "' to menu");
+			logger.Log("Unable to add IP : '" + ip.str_ip + "' to menu");
 			continue;
 		}
 		XPLMCheckMenuItem(eSkyInstructorMenu, menuId, xplm_Menu_Unchecked);
@@ -194,7 +195,7 @@ float RunCallback(float elapsed, float elpasedFlightLoop, int counter, void* ref
 
 void MenuHandlerCallback(void* inMenuRef, void* inItemRef)
 {
-	int id = (int)(inItemRef);
+	int id = (intptr_t)(inItemRef);
 	for(auto &kv : IPMap)
 	{
 		XPLMCheckMenuItem(eSkyInstructorMenu, kv.first, xplm_Menu_Unchecked);

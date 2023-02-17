@@ -11,15 +11,15 @@ class UDPBeaon : public IServer
 {
 public:
     UDPBeaon();
-    UDPBeaon(std::string ip);
+    UDPBeaon(IPInfo ip);
     int Initalize();
     int SendMessage(json message);
     json ReceiveMessage();
-    void SetIPAddress(std::string ip);
-    std::string GetIPAddress();
+    void SetIPAddress(IPInfo ip);
+    IPInfo GetIPAddress();
 protected:
     Logger m_logger = Logger("XPLMServer.log", "UDPBeacon", true);
-    std::vector<std::string> _ips;
+    std::vector<IPInfo> _ips;
     std::mutex gLock;
-    std::string m_ip;
+    IPInfo m_ip;
 };
