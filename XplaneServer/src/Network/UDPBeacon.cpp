@@ -1,10 +1,15 @@
 #include "UDPBeacon.h"
 
-UDPBeaon::UDPBeaon() : UDPBeaon("X.X.X.X")
+UDPBeaon::UDPBeaon()
 {
+    IPInfo ip;
+    ip.str_broadcast = "127.0.0.255";
+    ip.str_ip = "127.0.0.1";
+    ip.str_subnet = "255.255.255.0";
+    m_ip = ip;
 }
 
-UDPBeaon::UDPBeaon(std::string ip)
+UDPBeaon::UDPBeaon(IPInfo ip)
 {
     _ips = FindIp();
     m_ip = ip;
@@ -47,28 +52,20 @@ int UDPBeaon::SendMessage(json message)
 {
     std::time_t end_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     message.emplace("Time", std::ctime(&end_time));
-    message.emplace("IPAddress", this->GetIPAddress());
+    message.emplace("IPAddress", this->GetIPAddress().str_ip);
     message.emplace("ListeningPort", 50555);
     message.emplace("EmitPort", 50556);
-    struct addrinfo hints;
-    struct sockaddr_in ipTest;
-    if(_ips[0] != "127.0.0.1")
-    {
-        ipTest.sin_addr.s_addr = INADDR_BROADCAST;
-    }
-    else
-    {
-        sockaddr_in send_address = {};
-	    int res = inet_pton(AF_INET, "127.0.0.1", &ipTest.sin_addr.s_addr);
-    }
-    ipTest.sin_port = htons(50888);
-    ipTest.sin_family = AF_INET;
+    //struct addrinfo hints;
+    struct sockaddr_in ipTarget;
+    int res = inet_pton(AF_INET, GetIPAddress().str_broadcast.c_str(), &ipTarget.sin_addr.s_addr);
+    ipTarget.sin_port = htons(50888);
+    ipTarget.sin_family = AF_INET;
 
     return sendto(_socket,
         message.dump().c_str(), 
         static_cast<int>(message.dump().length()),
-        0, (sockaddr*)&ipTest,
-        static_cast<int>(sizeof(ipTest)));
+        0, (sockaddr*)&ipTarget,
+        static_cast<int>(sizeof(ipTarget)));
 }
 
 json UDPBeaon::ReceiveMessage()
@@ -76,17 +73,17 @@ json UDPBeaon::ReceiveMessage()
     return json();
 }
 
-void UDPBeaon::SetIPAddress(std::string ip)
+void UDPBeaon::SetIPAddress(IPInfo ip)
 {
     gLock.lock();
         m_ip = ip;
     gLock.unlock();
 }
 
-std::string UDPBeaon::GetIPAddress()
+IPInfo UDPBeaon::GetIPAddress()
 {
     gLock.lock();
-        std::string ip = m_ip;
+        IPInfo ip = m_ip;
     gLock.unlock();
     return ip;
 }

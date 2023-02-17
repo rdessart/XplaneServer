@@ -1,9 +1,9 @@
 #include "NetworkUtils.h"
 
 
-std::vector<std::string> FindIp()
+std::vector<IPInfo> FindIp()
 {
-    std::vector<std::string> ips;
+    std::vector<IPInfo> ips;
 #ifndef IBM
     struct ifaddrs* addrs, * ifloop;
     char buf[64];
@@ -33,7 +33,18 @@ std::vector<std::string> FindIp()
         {
             if (strcmp(pAdapter->IpAddressList.IpAddress.String, "0.0.0.0") != 0)
             {
-                ips.emplace_back(pAdapter->IpAddressList.IpAddress.String);
+                IPInfo ipInfo;
+                ipInfo.str_ip = pAdapter->IpAddressList.IpAddress.String;
+                ipInfo.str_subnet = pAdapter->IpAddressList.IpMask.String;
+
+                unsigned int ipr, sur;
+                inet_pton(AF_INET, ipInfo.str_ip.c_str(), &ipr);
+                inet_pton(AF_INET, ipInfo.str_subnet.c_str(), &sur);
+                unsigned int broadcast = ((ipr & sur) | ~sur);
+                char buffer[INET_ADDRSTRLEN];
+                inet_ntop(AF_INET, &broadcast, buffer, INET_ADDRSTRLEN);
+                ipInfo.str_broadcast = std::string(buffer);
+                ips.push_back(ipInfo);
             }
         }
     }
@@ -42,7 +53,11 @@ std::vector<std::string> FindIp()
     // if no  adapter we still work on localhost.
     if (ips.empty())
     {
-        ips.push_back("127.0.0.1");
+        IPInfo ip;
+        ip.str_ip = "127.0.0.1";
+        ip.str_subnet = "255.255.255.0";
+        ip.str_broadcast = "255.255.255.0";
+        ips.push_back(ip);
     }
     return ips;
 }
