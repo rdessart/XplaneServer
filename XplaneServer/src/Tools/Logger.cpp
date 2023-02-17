@@ -63,7 +63,7 @@ const char* Logger::CurrentDateTime()
 	sprintf_s(time, 20, "%02d/%02d/%04d %02d:%02d:%02d", ltm->tm_mday, ltm->tm_mon, ltm->tm_year,
 		ltm->tm_hour, ltm->tm_min, ltm->tm_sec);
 #else
-	sprintf(time, "%02d/%02d/%04d %02d:%02d:%02d", ltm->tm_mday, ltm->tm_mon, ltm->tm_year,
+	snprintf(time, 20, "%02d/%02d/%04d %02d:%02d:%02d", ltm->tm_mday, ltm->tm_mon, ltm->tm_year,
 		ltm->tm_hour, ltm->tm_min, ltm->tm_sec);
 #endif
 	return (const char*)time;
