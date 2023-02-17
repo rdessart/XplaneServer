@@ -44,7 +44,8 @@ $(BUILD_DIR)/Utils.o : $(SRC_DIR)/Tools/Utils.cpp $(SRC_DIR)/Tools/Utils.h | $(B
 	clang++ -c $(CXX_FLAGS) $(SRC_DIR)/Tools/Utils.cpp -o build/Utils.o
 
 publish:
-	mv build/mac.xpl "$(xplane_dir)/Resources/plugins/XPLMServer/64"
+	# cp build/mac.xpl "$(xplane_dir)/Resources/plugins/XPLMServer/64"
+	cp build/mac.xpl "/Volumes/DESSROM_SSD/X-Plane_12/Resources/plugins/XPLMServer/64"
 
 $(BUILD_DIR):
 	mkdir build/
