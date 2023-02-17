@@ -12,7 +12,7 @@ enum class DatarefType {
 
 class AbstractDataref {
 public:
-    DatarefType DatarefType = DatarefType::Abstract;
+    DatarefType TypeDataref = DatarefType::Abstract;
     virtual std::string GetValue() = 0;
     virtual void SetValue(std::string value) = 0;
     virtual void SetConversionFactor(std::string conversionFactor) = 0;

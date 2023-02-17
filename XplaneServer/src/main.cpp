@@ -6,6 +6,7 @@
 #include <string.h>
 #include <thread>
 #include <future>
+#include <cstdint>
 
 #include <nlohmann/json.hpp>
 
@@ -100,12 +101,12 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID inFromWho, int inMessage, voi
 static float InitalizerCallback(float elapsed, float elpasedFlightLoop, int counter, void* refcounter)
 {
 	Dataref d1;
-	d1.DatarefType = DatarefType::XPLMDataref;
+	d1.TypeDataref = DatarefType::XPLMDataref;
 	d1.Load("sim/aircraft/view/acf_author");
 	d1.SetType(Dataref::Type::Data);
 	
 	Dataref d2;
-	d2.DatarefType = DatarefType::XPLMDataref;
+	d2.TypeDataref = DatarefType::XPLMDataref;
 	d2.Load("sim/aircraft/view/acf_descrip");
 	d2.SetType(Dataref::Type::Data);
 
@@ -194,7 +195,7 @@ float RunCallback(float elapsed, float elpasedFlightLoop, int counter, void* ref
 
 void MenuHandlerCallback(void* inMenuRef, void* inItemRef)
 {
-	int id = (int)(inItemRef);
+	int id = (intptr_t)(inItemRef);
 	for(auto &kv : IPMap)
 	{
 		XPLMCheckMenuItem(eSkyInstructorMenu, kv.first, xplm_Menu_Unchecked);

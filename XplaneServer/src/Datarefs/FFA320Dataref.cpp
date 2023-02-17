@@ -7,7 +7,7 @@ m_ffapi(nullptr),
 m_logger(Logger("XPLMServer.log", "FFDataref", false)),
 m_needUpdate(false)
 {
-	DatarefType = DatarefType::FFDataref;
+	TypeDataref = DatarefType::FFDataref;
 }
 
 FFDataref::FFDataref(SharedValuesInterface* FF_A320_api) : FFDataref()
