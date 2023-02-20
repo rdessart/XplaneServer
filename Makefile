@@ -1,11 +1,11 @@
 # XPLANE_SDK := $(xplane_sdk)
 XPLANE_SDK := /Users/romaindessart/SDKs/X-Plane/SDK400b1
 
-VCPKG_INCLUDES  := /Users/romaindessart/vcpkg/installed/arm64-osx/include/
+VCPKG_INCLUDES  := /Users/romaindessart/vcpkg/installed/x64-osx/include/
 INCLUDE := -I $(XPLANE_SDK)/CHeaders/ -I$(VCPKG_INCLUDES)
 FRAMEWORK := -F $(XPLANE_SDK)/Libraries/Mac -framework XPLM
 DEFINES := -DAPL=1 -DXPLM200=1 -DXPLM210=1 -DXPLM300=1 -DXPLM301=1 -DXPLM303=1
-CXX_FLAGS := -Wno-int-to-void-pointer-cast -g --std=c++20 $(DEFINES) $(INCLUDE) -fPIC -fvisibility=hidden -arch arm64
+CXX_FLAGS := -Wno-int-to-void-pointer-cast -g --std=c++20 $(DEFINES) $(INCLUDE) -fPIC -fvisibility=hidden -arch x86_64
 BUILD_DIR := ./build
 SRC_DIR := ./XplaneServer/src
 
@@ -22,7 +22,7 @@ $(BUILD_DIR)/main.o : $(SRC_DIR)/main.cpp | $(BUILD_DIR)
 $(BUILD_DIR)/UDPBeacon.o : $(SRC_DIR)/Network/UDPBeacon.h $(SRC_DIR)/Network/UDPBeacon.cpp | $(BUILD_DIR)
 	clang++ -c $(CXX_FLAGS) $(SRC_DIR)/Network/UDPBeacon.cpp -o build/UDPBeacon.o
 
-$(BUILD_DIR)/UDPServer.o : $(SRC_DIR)/Network/UDPServer.h $(SRC_DIR)/Network/UDPServer.cpp | $(BUILD_DIR)
+$(BUILD_DIR)/UDPServer.o : $(SRC_DIR)/Network/UDPServer.h $(SRC_DIR)/Network/UDPServer.cpp $(SRC_DIR)/Network/Message.h | $(BUILD_DIR)
 	clang++ -c $(CXX_FLAGS) $(SRC_DIR)/Network/UDPServer.cpp -o build/UDPServer.o
 
 $(BUILD_DIR)/NetworkUtils.o : $(SRC_DIR)/Network/NetworkUtils.h $(SRC_DIR)/Network/NetworkUtils.cpp | $(BUILD_DIR)
@@ -34,7 +34,7 @@ $(BUILD_DIR)/Logger.o : $(SRC_DIR)/Tools/Logger.cpp $(SRC_DIR)/Tools/Logger.h | 
 $(BUILD_DIR)/Dataref.o : $(SRC_DIR)/Datarefs/Dataref.cpp $(SRC_DIR)/Datarefs/Dataref.h $(SRC_DIR)/Datarefs/AbstractDataref.h | $(BUILD_DIR)
 	clang++ -c $(CXX_FLAGS) $(SRC_DIR)/Datarefs/Dataref.cpp -o build/Dataref.o
 
-$(BUILD_DIR)/DatarefManager.o : $(SRC_DIR)/Datarefs/DatarefManager.cpp $(SRC_DIR)/Datarefs/DatarefManager.h $(SRC_DIR)/Datarefs/AbstractDataref.h | $(BUILD_DIR)
+$(BUILD_DIR)/DatarefManager.o : $(SRC_DIR)/Datarefs/DatarefManager.cpp $(SRC_DIR)/Datarefs/DatarefManager.h $(SRC_DIR)/Datarefs/AbstractDataref.h $(SRC_DIR)/Network/Message.h| $(BUILD_DIR)
 	clang++ -c $(CXX_FLAGS) $(SRC_DIR)/Datarefs/DatarefManager.cpp -o build/DatarefManager.o
 
 $(BUILD_DIR)/FFA320Dataref.o : $(SRC_DIR)/Datarefs/FFA320Dataref.cpp $(SRC_DIR)/Datarefs/FFA320Dataref.h $(SRC_DIR)/Datarefs/AbstractDataref.h | $(BUILD_DIR)

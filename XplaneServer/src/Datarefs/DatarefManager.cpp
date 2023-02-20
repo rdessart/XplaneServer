@@ -37,21 +37,22 @@ void Callback(double step, void* tag)
 	DatarefManager* cm = (DatarefManager*)tag;
     while(cm->GetMessageQueueLenght() > 0)
     {
-        json message = cm->GetNextMessage();
-        cm->GetLogger().Log("Message : '" + message.dump() + "'");
-        if (!message.contains("Operation")) continue;
-        OperationsEnum ops = GetOperation(message.value("Operation", ""));
+        Message m = cm->GetNextMessage();
+        cm->GetLogger().Log("Message : '" + m.message.dump() + "'");
+        if (!m.message.contains("Operation")) continue;
+        OperationsEnum ops = GetOperation(m.message.value("Operation", ""));
         switch (ops)
         {
         case OperationsEnum::Speak:
-            XPLMSpeakString(message.value("Text", "").c_str());
+            XPLMSpeakString(m.message.value("Text", "").c_str());
+            m.message["Result"] = "Ok";
             break;
         case OperationsEnum::SetData:
         {
             cm->GetLogger().Log("Setting dataref");
-            if(!message.contains("Dataref")) continue;
+            if(!m.message.contains("Dataref")) continue;
             AbstractDataref* d;
-            std::string link = message["Dataref"]["Link"].get<std::string>();
+            std::string link = m.message["Dataref"]["Link"].get<std::string>();
             if( cm->isFF320Api() &&
                 link.find("Aircraft") != std::string::npos &&
                 link.find(".") != std::string::npos)
@@ -61,24 +62,31 @@ void Callback(double step, void* tag)
             else {
                 d = new Dataref();
             }
-            d->FromJson(message["Dataref"]);
+            d->FromJson(m.message["Dataref"]);
+            m.message["Result"] = "Ok";
             break;
         }
         case OperationsEnum::GetData:
             cm->GetLogger().Log("Getting dataref");
+            m.message["Result"] = "NotImplemented";
             break;
         case OperationsEnum::RegisterData:
             cm->GetLogger().Log("Registering dataref");
+            m.message["Result"] = "NotImplemented";
             break;
         case OperationsEnum::SetRegData:
             cm->GetLogger().Log("Setting registered dataref");
+            m.message["Result"] = "NotImplemented";
             break;
         case OperationsEnum::GetRegData:
             cm->GetLogger().Log("Getting registered dataref");
+            m.message["Result"] = "NotImplemented";
             break;
         default:
+            m.message["Result"] = "NoOp";
             break;
         }
+        cm->AddMessageToOutQueue(m);
     }
 }
 
@@ -152,17 +160,17 @@ AbstractDataref *DatarefManager::GetDatarefByName(std::string name)
     return _datarefMap.at(name);
 }
 
-void DatarefManager::AddMessageToQueue(json j)
+void DatarefManager::AddMessageToQueue(Message m)
 {
     gLock.lock();
-        m_messageQueue.emplace(j);
+        m_messageQueue.emplace(m);
     gLock.unlock();
 }
 
-json DatarefManager::GetNextMessage()
+Message DatarefManager::GetNextMessage()
 {
     gLock.lock();
-        json message = m_messageQueue.back();
+        Message message = m_messageQueue.back();
         m_messageQueue.pop();
     gLock.unlock();
     return message;
@@ -171,14 +179,38 @@ json DatarefManager::GetNextMessage()
 std::size_t DatarefManager::GetMessageQueueLenght()
 {
     gLock.lock();
-    std::size_t lenght = m_messageQueue.size();
+        std::size_t lenght = m_messageQueue.size();
     gLock.unlock();
     return lenght;
 }
 
-std::queue<json> DatarefManager::GetQueue()
+Message DatarefManager::GetNextMessageOut()
 {
-    return std::queue<json>(m_messageQueue);
+    gLock.lock();
+        Message message = m_messageOutQueue.back();
+        m_messageOutQueue.pop();
+    gLock.unlock();
+    return message;
+}
+
+void DatarefManager::AddMessageToOutQueue(Message m)
+{
+     gLock.lock();
+        m_messageOutQueue.emplace(m);
+    gLock.unlock();
+}
+
+std::size_t DatarefManager::GetMessageOutQueueLenght()
+{
+    gLock.lock();
+        std::size_t lenght = m_messageOutQueue.size();
+    gLock.unlock();
+    return lenght;
+}
+
+std::queue<Message> DatarefManager::GetQueue()
+{
+    return std::queue<Message>(m_messageQueue);
 }
 
 Logger DatarefManager::GetLogger()

@@ -44,14 +44,14 @@ int UDPServer::Initalize()
     return 0x00;
 }
 
-int UDPServer::SendMessage(json message)
+int UDPServer::SendMessage(Message message)
 {
     return sendto(_socket, 
-        message.dump().c_str(), 
-        static_cast<int>(message.dump().length()), 
+        message.message.dump().c_str(), 
+        static_cast<int>(message.message.dump().length()), 
         0,
-        _targetAddress->ai_addr,
-        static_cast<int>(_targetAddress->ai_addrlen));
+        (sockaddr*)&message.target,
+        static_cast<int>(message.target_lenght));
 }
 
 void UDPServer::ReceiveMessage(DatarefManager* manager)
@@ -85,7 +85,11 @@ void UDPServer::ReceiveMessage(DatarefManager* manager)
             std::string strData(data);
             strData = strData.substr(0,received);
             json message = json::parse(strData);
-            manager->AddMessageToQueue(message);
+            Message m;
+            m.message = message;
+            m.target = cliAddr;
+            m.target_lenght = clientLen;
+            manager->AddMessageToQueue(m);
         }
     }
     return;

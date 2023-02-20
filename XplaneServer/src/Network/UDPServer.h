@@ -10,7 +10,7 @@ public:
 	UDPServer();
     ~UDPServer();
     int Initalize();
-    int SendMessage(json message);
+    int SendMessage(Message message);
     void ReceiveMessage(DatarefManager* manager);
 protected:
 #ifdef IBM

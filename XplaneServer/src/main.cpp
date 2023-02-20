@@ -190,6 +190,10 @@ static float BeaconCallback(float elapsed, float elpasedFlightLoop, int counter,
 float RunCallback(float elapsed, float elpasedFlightLoop, int counter, void* refcounter)
 {
 	Callback(0.0, manager);
+	while(manager->GetMessageOutQueueLenght() > 0)
+	{
+		server.SendMessage(manager->GetNextMessageOut());
+	}
 	return -1.0f;
 }
 

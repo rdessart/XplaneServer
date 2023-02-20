@@ -14,6 +14,7 @@
 #include "Dataref.h"
 #include "../Tools/SharedValue.h"
 #include "../Tools/Logger.h"
+#include "../Network/Message.h"
 
 using json = nlohmann::json;
 
@@ -29,10 +30,13 @@ public:
                    Dataref::Type type = Dataref::Type::Unknown);
 
     AbstractDataref* GetDatarefByName(std::string name);
-    void AddMessageToQueue(json j);
-    json GetNextMessage();
+    void AddMessageToQueue(Message m);
+    Message GetNextMessage();
     std::size_t GetMessageQueueLenght();
-    std::queue<json> GetQueue();
+    Message GetNextMessageOut();
+    void AddMessageToOutQueue(Message m);
+    std::size_t GetMessageOutQueueLenght();
+    std::queue<Message> GetQueue();
     Logger GetLogger();
     bool isFF320Api();
     SharedValuesInterface* GetFF320Interface();
@@ -42,6 +46,7 @@ protected:
     std::map<std::string, AbstractDataref*> _datarefMap;
     SharedValuesInterface* m_ff320;
     bool _isFF320Enable = false;
-    std::queue<json> m_messageQueue;
+    std::queue<Message> m_messageQueue;
+    std::queue<Message> m_messageOutQueue;
     std::mutex gLock;
 };
