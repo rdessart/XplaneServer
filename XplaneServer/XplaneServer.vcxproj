@@ -82,7 +82,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(xplane)Resources\plugins\XplaneServer\win_x64\</OutDir>
-    <TargetName>xplaneServer</TargetName>
+    <TargetName>XplaneServer</TargetName>
     <TargetExt>.xpl</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
