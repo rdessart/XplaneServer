@@ -5,7 +5,7 @@ XPLANE_SDK := /Users/romaindessart/SDKs/X-Plane/SDK400b1
 
 FRAMEWORK := -F $(XPLANE_SDK)/Libraries/Mac -framework XPLM
 DEFINES := -DAPL=1 -DXPLM200=1 -DXPLM210=1 -DXPLM300=1 -DXPLM301=1 -DXPLM303=1
-PUBLISH_DIR := ./XplaneServer
+PUBLISH_DIR := ./publish/XplaneServer
 SRC_DIR := ./XplaneServer/src
 INCLUDE := -I $(XPLANE_SDK)/CHeaders/ 
 ifeq ($(ARCH), x64)
@@ -53,17 +53,21 @@ $(BUILD_DIR)/Utils.o : $(SRC_DIR)/Tools/Utils.cpp $(SRC_DIR)/Tools/Utils.h | $(B
 	clang++ -c $(CXX_FLAGS) $(SRC_DIR)/Tools/Utils.cpp -o $(BUILD_DIR)Utils.o
 
 ifeq ($(ARCH), x64)
-publish :
+publish: $(BUILD_DIR)/mac.xpl
 	mkdir -p $(PUBLISH_DIR)/64 $(PUBLISH_DIR)/mac_x64 $(PUBLISH_DIR)/mac_arm64
 	cp $(BUILD_DIR)mac.xpl $(PUBLISH_DIR)/64
 	cp $(BUILD_DIR)mac.xpl $(PUBLISH_DIR)/mac_x64/
 	mv $(PUBLISH_DIR)/mac_x64/mac.xpl $(PUBLISH_DIR)/mac_x64/XplaneServer.xpl
 else
-publish :
+publish: $(BUILD_DIR)/mac.xpl
 	mkdir -p $(PUBLISH_DIR)/64 $(PUBLISH_DIR)/mac_x64 $(PUBLISH_DIR)/mac_arm64
 	cp $(BUILD_DIR)mac.xpl $(PUBLISH_DIR)/mac_arm64/
 	mv $(PUBLISH_DIR)/mac_arm64/mac.xpl $(PUBLISH_DIR)/mac_arm64/XplaneServer.xpl
 endif
+
+release:
+	7zz a XplaneServer.zip $(PUBLISH_DIR)
+	rm -r $(PUBLISH_DIR)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
