@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../Network/Message.h"
+
 #include <string>
 #include <vector>
 #include <map>
@@ -14,7 +16,6 @@
 #include "Dataref.h"
 #include "../Tools/SharedValue.h"
 #include "../Tools/Logger.h"
-#include "../Network/Message.h"
 
 using json = nlohmann::json;
 

@@ -180,6 +180,7 @@
   <ItemGroup>
     <ClInclude Include="src\Datarefs\DatarefManager.h" />
     <ClInclude Include="src\Datarefs\FFA320Dataref.h" />
+    <ClInclude Include="src\Network\Message.h" />
     <ClInclude Include="src\Network\NetworkUtils.h" />
     <ClInclude Include="src\Network\IServer.h" />
     <ClInclude Include="src\Network\UDPServer.h" />

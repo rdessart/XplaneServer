@@ -23,6 +23,7 @@
 static float InitalizerCallback(float elapsed, float elpasedFlightLoop, int counter, void* refcounter);
 static float BeaconCallback(float elapsed, float elpasedFlightLoop, int counter, void* refcounter);
 static float RunCallback(float elapsed, float elpasedFlightLoop, int counter, void* refcounter);
+static float ResponseCallback(float elapsed, float elpasedFlightLoop, int counter, void* refcounter);
 static void	MenuHandlerCallback(void* inMenuRef, void* inItemRef);
 
 std::map<int, IPInfo> IPMap;
@@ -160,13 +161,29 @@ static float InitalizerCallback(float elapsed, float elpasedFlightLoop, int coun
 		XPLMScheduleFlightLoop(callbackId, -1.0f, 1);
 	}
 
+	XPLMCreateFlightLoop_t respCallbackParameter;
+	respCallbackParameter.structSize = sizeof(XPLMCreateFlightLoop_t);
+	respCallbackParameter.phase = xplm_FlightLoop_Phase_BeforeFlightModel;
+	respCallbackParameter.refcon = nullptr;
+	respCallbackParameter.callbackFunc = ResponseCallback;
+	XPLMFlightLoopID respCallbackId = XPLMCreateFlightLoop(&respCallbackParameter);
+	XPLMScheduleFlightLoop(respCallbackId, -1.0f, 1);
 
 	return 0;
 }
-
+	
 void SendBeacon(json message)
 {
 	beacon.SendMessage(message);
+}
+
+static float ResponseCallback(float elapsed, float elpasedFlightLoop, int counter, void* refcounter)
+{
+	while (manager->GetMessageOutQueueLenght() > 0)
+	{
+		server.SendMessage(manager->GetNextMessageOut());
+	}
+	return 0.1f;
 }
 
 static float BeaconCallback(float elapsed, float elpasedFlightLoop, int counter, void* refcounter)
@@ -190,16 +207,12 @@ static float BeaconCallback(float elapsed, float elpasedFlightLoop, int counter,
 float RunCallback(float elapsed, float elpasedFlightLoop, int counter, void* refcounter)
 {
 	Callback(0.0, manager);
-	while(manager->GetMessageOutQueueLenght() > 0)
-	{
-		server.SendMessage(manager->GetNextMessageOut());
-	}
 	return -1.0f;
 }
 
 void MenuHandlerCallback(void* inMenuRef, void* inItemRef)
 {
-	int id = (intptr_t)(inItemRef);
+	intptr_t id = (intptr_t)(inItemRef);
 	for(auto &kv : IPMap)
 	{
 		XPLMCheckMenuItem(eSkyInstructorMenu, kv.first, xplm_Menu_Unchecked);

@@ -1,12 +1,10 @@
-#include <nlohmann/json.hpp>
-
 #ifndef IBM
 	#include <netinet/in.h>
 #else
     #include <WinSock2.h>
 	#include <WS2tcpip.h>
 #endif
-
+#include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
 struct Message
