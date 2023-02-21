@@ -67,9 +67,29 @@ void Callback(double step, void* tag)
             break;
         }
         case OperationsEnum::GetData:
+        {
             cm->GetLogger().Log("Getting dataref");
-            m.message["Result"] = "NotImplemented";
+            if (!m.message.contains("Dataref")) {
+                m.message["Result"] = "Error:Missing Dataref entry in JSON";
+                continue;
+            }
+            std::string link = m.message["Dataref"]["Link"].get<std::string>();
+            AbstractDataref* d;
+            if (cm->isFF320Api() &&
+                link.find("Aircraft") != std::string::npos &&
+                link.find(".") != std::string::npos)
+            {
+                d = new FFDataref(cm->GetFF320Interface());
+            }
+            else {
+                d = new Dataref();
+            }
+            d->FromJson(m.message["Dataref"]);
+            std::string value = d->GetValue();
+            m.message["Dataref"]["Value"] = value;
+            m.message["Result"] = "Ok";
             break;
+        }
         case OperationsEnum::RegisterData:
             cm->GetLogger().Log("Registering dataref");
             m.message["Result"] = "NotImplemented";
