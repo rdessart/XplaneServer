@@ -393,6 +393,10 @@ void Dataref::FromJson(json data)
 	{
 		m_logger.Log("Dataref: '" + m_link + "' is READONLY", Logger::Severity::WARNING);
 	}
+	if(!data.contains("Type"))
+	{
+		this->LoadType();
+	}
 	if(data.contains("Value"))
 	{
 		//check if type is string or int/float/json

@@ -69,7 +69,6 @@ void Callback(double step, void* tag)
         case OperationsEnum::GetData:
         {
             cm->GetLogger().Log("Getting dataref");
-            m.message["Result"] = "NotImplemented";
             if (!m.message.contains("Dataref")) {
                 m.message["Result"] = "Error:Missing Dataref entry in JSON";
                 continue;
