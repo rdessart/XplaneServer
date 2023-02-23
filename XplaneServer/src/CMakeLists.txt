@@ -61,3 +61,7 @@ endif()
 set_target_properties(XplaneServer PROPERTIES PREFIX "")
 set_target_properties(XplaneServer PROPERTIES OUTPUT_NAME ${OUTPUT_FILE_NAME})
 set_target_properties(XplaneServer PROPERTIES SUFFIX "")
+
+set_target_properties(XplaneServer PROPERTIES
+                      RUNTIME_OUTPUT_DIRECTORY_DEBUG ../../build/
+                      RUNTIME_OUTPUT_DIRECTORY_RELEASE ../../build/)
