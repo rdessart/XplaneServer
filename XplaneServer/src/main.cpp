@@ -217,7 +217,7 @@ void MenuHandlerCallback(void* inMenuRef, void* inItemRef)
 	{
 		XPLMCheckMenuItem(eSkyInstructorMenu, kv.first, xplm_Menu_Unchecked);
 	}
-	XPLMCheckMenuItem(eSkyInstructorMenu, id, xplm_Menu_Checked);
-	beacon.SetIPAddress(IPMap[id]);
+	XPLMCheckMenuItem(eSkyInstructorMenu, static_cast<int>(id), xplm_Menu_Checked);
+	beacon.SetIPAddress(IPMap[static_cast<int>(id)]);
 	return;
 }
