@@ -304,7 +304,7 @@ AbstractDataref *DatarefManager::GetDatarefByName(std::string name)
         }
         else 
         {
-            AbstractDataref* dataref = m_datarefMap.at(name);
+            dataref = m_datarefMap.at(name);
         }
     gLock.unlock();
     return dataref;
