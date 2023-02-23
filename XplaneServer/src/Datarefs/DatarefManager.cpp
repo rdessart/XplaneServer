@@ -23,9 +23,7 @@ OperationsEnum GetOperation(std::string ops)
         {"registerdata", OperationsEnum::RegisterData},
         {"setregdata", OperationsEnum::SetRegData},
         {"getregdata", OperationsEnum::GetRegData},
-        {"datarefinfo", OperationsEnum::GetRegData},
-        {"regdatarefinfo", OperationsEnum::GetRegData},
-        {"regdatarefinfo", OperationsEnum::GetDatarefInfo},
+        {"datarefinfo", OperationsEnum::GetDatarefInfo},
         {"regdatarefinfo", OperationsEnum::GetRegDatarefInfo},
     };
     std::transform(ops.begin(), ops.end(), ops.begin(),
