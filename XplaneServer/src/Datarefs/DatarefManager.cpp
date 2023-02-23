@@ -74,10 +74,10 @@ void Callback(double step, void* tag)
         case OperationsEnum::GetData:
         {
             cm->GetLogger().Log("Getting dataref");
-            if (!m.message.contains("Dataref")) {
+            if (!m.message.contains("Dataref")) 
+            {
                 m.message["Result"] = "Error:Missing Dataref entry in JSON";
-                cm->AddMessageToOutQueue(m);
-                continue;
+                break;
             }
             std::string link = m.message["Dataref"]["Link"].get<std::string>();
             AbstractDataref* d;
@@ -102,14 +102,12 @@ void Callback(double step, void* tag)
             cm->GetLogger().Log("Registering dataref");
             if (!m.message.contains("Dataref")) {
                 m.message["Result"] = "Error:Missing Dataref entry in JSON";
-                cm->AddMessageToOutQueue(m);
-                continue;
+                break;
             }
             if (!m.message.contains("Name"))
             {
                 m.message["Result"] = "Error:Missing 'Name' field";
-                cm->AddMessageToOutQueue(m);
-                continue;
+                break;
             }
             std::string link = m.message["Dataref"]["Link"].get<std::string>();
             AbstractDataref* d;
@@ -134,21 +132,18 @@ void Callback(double step, void* tag)
             if (!m.message.contains("Name"))
             {
                 m.message["Result"] = "Error:Missing 'Name' field";
-                cm->AddMessageToOutQueue(m);
-                continue;
+                break;
             }
             if (!m.message.contains("Value"))
             {
                 m.message["Result"] = "Error:Missing 'Value' field";
-                cm->AddMessageToOutQueue(m);
-                continue;
+                break;
             }
 
             AbstractDataref* d = cm->GetDatarefByName(m.message.value("Name", ""));
             if (d == nullptr) {
                 m.message["Result"] = "Error:Dataref not in map !";
-                cm->AddMessageToOutQueue(m);
-                continue;
+                break;
             }
             d->SetValue(m.message.value("Value", ""));
 
@@ -163,15 +158,13 @@ void Callback(double step, void* tag)
             if (!m.message.contains("Name"))
             {
                 m.message["Result"] = "Error:Missing 'Name' field";
-                cm->AddMessageToOutQueue(m);
-                continue;
+                break;
             }
 
             AbstractDataref* d = cm->GetDatarefByName(m.message.value("Name", ""));
             if (d == nullptr) {
                 m.message["Result"] = "Error:Dataref not in map !";
-                cm->AddMessageToOutQueue(m);
-                continue;
+                break;;
             }
 
             m.message["Value"] = d->GetValue();
@@ -184,8 +177,7 @@ void Callback(double step, void* tag)
             cm->GetLogger().Log("Getting dataref");
             if (!m.message.contains("Dataref")) {
                 m.message["Result"] = "Error:Missing Dataref entry in JSON";
-                cm->AddMessageToOutQueue(m);
-                continue;
+                break;
             }
             std::string link = m.message["Dataref"]["Link"].get<std::string>();
             AbstractDataref* d;
@@ -198,6 +190,7 @@ void Callback(double step, void* tag)
             else {
                 d = new Dataref();
             }
+            d->FromJson(m.message["Dataref"]);
             m.message["Dataref"] = d->ToJson();
             cm->AddMessageToOutQueue(m);
             break;
@@ -208,20 +201,17 @@ void Callback(double step, void* tag)
             if (!m.message.contains("Name"))
             {
                 m.message["Result"] = "Error:Missing 'Name' field";
-                cm->AddMessageToOutQueue(m);
-                continue;
+                break;
             }
 
             AbstractDataref* d = cm->GetDatarefByName(m.message.value("Name", ""));
             if (d == nullptr) {
                 m.message["Result"] = "Error:Dataref not in map !";
-                cm->AddMessageToOutQueue(m);
-                continue;
+                break;
             }
 
             m.message["Dataref"] = d->ToJson();
             m.message["Result"] = "Ok";
-            cm->AddMessageToOutQueue(m);
             break;
         }
         default:

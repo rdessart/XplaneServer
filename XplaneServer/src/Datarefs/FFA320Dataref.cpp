@@ -256,20 +256,24 @@ int FFDataref::GetID() const
 
 int FFDataref::GetFlag() const
 {
+	if (m_id < 0) return -1;
 	return m_ffapi->ValueType(m_id);
 }
 
 int FFDataref::GetUnit() const
 {
+	if (m_id < 0) return -1;
 	return m_ffapi->ValueUnits(m_id);
 }
 
 std::string FFDataref::GetName() const
 {
+	if (m_id < 0) return "";
 	return std::string(m_ffapi->ValueName(m_id));
 }
 
 std::string FFDataref::GetDescription() const
 {
+	if (m_id < 0) return "";
 	return std::string(m_ffapi->ValueDesc(m_id));
 }

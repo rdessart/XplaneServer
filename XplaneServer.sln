@@ -8,7 +8,7 @@ EndProject
 Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "X-Plane", "..\..\..\..\..\..\X-Plane 11\X-Plane.exe", "{D2FA68ED-0281-4BA7-9970-4495548F5D97}"
 	ProjectSection(DebuggerProjectSystem) = preProject
 		PortSupplier = 00000000-0000-0000-0000-000000000000
-		Executable = C:\X-Plane 11\X-Plane.exe
+		Executable = C:\X-Plane 12\X-Plane.exe
 		RemoteMachine = ZOIDBERG
 		StartingDirectory = C:\X-Plane 11
 		Environment = Default

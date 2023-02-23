@@ -71,22 +71,22 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(xplane)Resources\plugins\XplaneServer\win_x64\</OutDir>
+    <OutDir>C:\X-Plane 12\Resources\plugins\XplaneServer\win_x64\</OutDir>
     <TargetName>xplaneServer</TargetName>
     <TargetExt>.xpl</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(xplane)Resources\plugins\XplaneServer\win_x64\</OutDir>
+    <OutDir>C:\X-Plane 12\Resources\plugins\XplaneServer\win_x64\</OutDir>
     <TargetName>xplaneServer</TargetName>
     <TargetExt>.xpl</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(xplane)Resources\plugins\XplaneServer\win_x64\</OutDir>
+    <OutDir>C:\X-Plane 12\Resources\plugins\XplaneServer\win_x64\</OutDir>
     <TargetName>XplaneServer</TargetName>
     <TargetExt>.xpl</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(xplane)Resources\plugins\XplaneServer\win_x64\</OutDir>
+    <OutDir>C:\X-Plane 12\Resources\plugins\XplaneServer\win_x64\</OutDir>
     <TargetName>xplaneServer</TargetName>
     <TargetExt>.xpl</TargetExt>
   </PropertyGroup>
