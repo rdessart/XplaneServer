@@ -42,17 +42,17 @@ bool Dataref::Load(std::string path)
 	return true;
 }
 
-bool Dataref::CanWrite()
+bool Dataref::CanWrite() const
 {
 	return m_dataref && XPLMCanWriteDataRef(m_dataref);
 }
 
-bool Dataref::IsGood()
+bool Dataref::IsGood() const
 {
 	return m_dataref && XPLMIsDataRefGood(m_dataref);
 }
 
-Dataref::Type Dataref::GetType()
+Dataref::Type Dataref::GetType() const
 {
 	return m_type;
 }
@@ -89,7 +89,7 @@ void Dataref::SetType(std::string newType)
 	}
 }
 
-std::string Dataref::GetValue()
+std::string Dataref::GetValue() const
 {
 	if (m_dataref == NULL)
 	{
@@ -164,7 +164,7 @@ std::string Dataref::GetValue()
 	return value;
 }
 
-void Dataref::SetValue(std::string value)
+void Dataref::SetValue(std::string value) const
 {
 	if (m_dataref == NULL || !this->CanWrite())
 	{
@@ -241,7 +241,7 @@ void Dataref::SetConversionFactor(std::string conversionFactor)
 	m_conversionFactor = conversionFactor;
 }
 
-int Dataref::setFloatArrayFromJson(int offset, std::string value)
+int Dataref::setFloatArrayFromJson(int offset, std::string value) const
 {
 	std::vector<float> data;
 	int maxSize = XPLMGetDatavf(m_dataref, nullptr, 0, 0);
@@ -303,7 +303,7 @@ int Dataref::setFloatArrayFromJson(int offset, std::string value)
 	return EXIT_SUCCESS;
 }
 
-int Dataref::setIntArrayFromJson(int offset, std::string value)
+int Dataref::setIntArrayFromJson(int offset, std::string value) const
 {
 	std::vector<int> data;
 	int maxSize = XPLMGetDatavi(m_dataref, nullptr, 0, 0);
@@ -403,4 +403,16 @@ void Dataref::FromJson(json data)
 		std::string value = ExtractValueJson(data["Value"]);
 		this->SetValue(value);
 	}
+}
+
+json Dataref::ToJson() const
+{
+	json j = json();
+	j["Type"] = m_type;
+	j["Link"] = m_link;
+	j["ConversionFactor"] = m_conversionFactor;
+	j["Good"] = this->IsGood();
+	j["ReadOnly"] = !this->CanWrite();
+	j["Value"] = this->GetValue();
+	return j;
 }

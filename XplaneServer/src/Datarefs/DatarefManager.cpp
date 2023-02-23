@@ -9,7 +9,9 @@ enum class OperationsEnum
     GetData,
     RegisterData,
     SetRegData,
-    GetRegData
+    GetRegData,
+    GetDatarefInfo,
+    GetRegDatarefInfo,
 };
 
 OperationsEnum GetOperation(std::string ops)
@@ -21,6 +23,10 @@ OperationsEnum GetOperation(std::string ops)
         {"registerdata", OperationsEnum::RegisterData},
         {"setregdata", OperationsEnum::SetRegData},
         {"getregdata", OperationsEnum::GetRegData},
+        {"datarefinfo", OperationsEnum::GetRegData},
+        {"regdatarefinfo", OperationsEnum::GetRegData},
+        {"regdatarefinfo", OperationsEnum::GetDatarefInfo},
+        {"regdatarefinfo", OperationsEnum::GetRegDatarefInfo},
     };
     std::transform(ops.begin(), ops.end(), ops.begin(),
         [](unsigned char c) { return std::tolower(c); });
@@ -64,6 +70,7 @@ void Callback(double step, void* tag)
             }
             d->FromJson(m.message["Dataref"]);
             m.message["Result"] = "Ok";
+            free(d);
             break;
         }
         case OperationsEnum::GetData:
@@ -71,6 +78,7 @@ void Callback(double step, void* tag)
             cm->GetLogger().Log("Getting dataref");
             if (!m.message.contains("Dataref")) {
                 m.message["Result"] = "Error:Missing Dataref entry in JSON";
+                cm->AddMessageToOutQueue(m);
                 continue;
             }
             std::string link = m.message["Dataref"]["Link"].get<std::string>();
@@ -88,20 +96,136 @@ void Callback(double step, void* tag)
             std::string value = d->GetValue();
             m.message["Dataref"]["Value"] = value;
             m.message["Result"] = "Ok";
+            free(d);
             break;
         }
         case OperationsEnum::RegisterData:
+        {
             cm->GetLogger().Log("Registering dataref");
-            m.message["Result"] = "NotImplemented";
+            if (!m.message.contains("Dataref")) {
+                m.message["Result"] = "Error:Missing Dataref entry in JSON";
+                cm->AddMessageToOutQueue(m);
+                continue;
+            }
+            if (!m.message.contains("Name"))
+            {
+                m.message["Result"] = "Error:Missing 'Name' field";
+                cm->AddMessageToOutQueue(m);
+                continue;
+            }
+            std::string link = m.message["Dataref"]["Link"].get<std::string>();
+            AbstractDataref* d;
+            if (cm->isFF320Api() &&
+                link.find("Aircraft") != std::string::npos &&
+                link.find(".") != std::string::npos)
+            {
+                d = new FFDataref(cm->GetFF320Interface());
+            }
+            else {
+                d = new Dataref();
+            }
+            d->FromJson(m.message["Dataref"]);
+            cm->AddDatarefToMap(m.message["Name"], d);
+            m.message["Result"] = "Ok";
+            cm->AddMessageToOutQueue(m);
             break;
+        }
         case OperationsEnum::SetRegData:
+        {
             cm->GetLogger().Log("Setting registered dataref");
-            m.message["Result"] = "NotImplemented";
+            if (!m.message.contains("Name"))
+            {
+                m.message["Result"] = "Error:Missing 'Name' field";
+                cm->AddMessageToOutQueue(m);
+                continue;
+            }
+            if (!m.message.contains("Value"))
+            {
+                m.message["Result"] = "Error:Missing 'Value' field";
+                cm->AddMessageToOutQueue(m);
+                continue;
+            }
+
+            AbstractDataref* d = cm->GetDatarefByName(m.message.value("Name", ""));
+            if (d == nullptr) {
+                m.message["Result"] = "Error:Dataref not in map !";
+                cm->AddMessageToOutQueue(m);
+                continue;
+            }
+            d->SetValue(m.message.value("Value", ""));
+
+            m.message["Value"] = d->GetValue();
+            m.message["Result"] = "Ok";
+            cm->AddMessageToOutQueue(m);
             break;
+        }
         case OperationsEnum::GetRegData:
-            cm->GetLogger().Log("Getting registered dataref");
-            m.message["Result"] = "NotImplemented";
+        {
+            cm->GetLogger().Log("Setting registered dataref");
+            if (!m.message.contains("Name"))
+            {
+                m.message["Result"] = "Error:Missing 'Name' field";
+                cm->AddMessageToOutQueue(m);
+                continue;
+            }
+
+            AbstractDataref* d = cm->GetDatarefByName(m.message.value("Name", ""));
+            if (d == nullptr) {
+                m.message["Result"] = "Error:Dataref not in map !";
+                cm->AddMessageToOutQueue(m);
+                continue;
+            }
+
+            m.message["Value"] = d->GetValue();
+            m.message["Result"] = "Ok";
+            cm->AddMessageToOutQueue(m);
             break;
+        }
+        case OperationsEnum::GetDatarefInfo: 
+        {
+            cm->GetLogger().Log("Getting dataref");
+            if (!m.message.contains("Dataref")) {
+                m.message["Result"] = "Error:Missing Dataref entry in JSON";
+                cm->AddMessageToOutQueue(m);
+                continue;
+            }
+            std::string link = m.message["Dataref"]["Link"].get<std::string>();
+            AbstractDataref* d;
+            if (cm->isFF320Api() &&
+                link.find("Aircraft") != std::string::npos &&
+                link.find(".") != std::string::npos)
+            {
+                d = new FFDataref(cm->GetFF320Interface());
+            }
+            else {
+                d = new Dataref();
+            }
+            m.message["Dataref"] = d->ToJson();
+            cm->AddMessageToOutQueue(m);
+            break;
+        }
+        case OperationsEnum::GetRegDatarefInfo:
+        {
+            cm->GetLogger().Log("Setting registered dataref");
+            if (!m.message.contains("Name"))
+            {
+                m.message["Result"] = "Error:Missing 'Name' field";
+                cm->AddMessageToOutQueue(m);
+                continue;
+            }
+
+            AbstractDataref* d = cm->GetDatarefByName(m.message.value("Name", ""));
+            if (d == nullptr) {
+                m.message["Result"] = "Error:Dataref not in map !";
+                cm->AddMessageToOutQueue(m);
+                continue;
+            }
+
+            m.message["Dataref"] = d->ToJson();
+            m.message["Result"] = "Ok";
+            cm->AddMessageToOutQueue(m);
+            break;
+        }
         default:
             m.message["Result"] = "NoOp";
             break;
@@ -111,7 +235,7 @@ void Callback(double step, void* tag)
 }
 
 DatarefManager::DatarefManager(bool enableFlightFactorAPI) :
-    _isFF320Enable(false), m_ff320(0)
+    m_isFF320Enable(false), m_ff320(0)
 {
     if(enableFlightFactorAPI)
     {
@@ -131,53 +255,66 @@ DatarefManager::DatarefManager(bool enableFlightFactorAPI) :
         }
         unsigned int ffAPIdataversion = m_ff320->DataVersion();
         m_logger.Log("[FF320API] Version : " + std::to_string(ffAPIdataversion));
-        _isFF320Enable = true;
+        m_isFF320Enable = true;
         m_ff320->DataAddUpdate(Callback, this);
     }
 
 }
 
-std::size_t DatarefManager::AddDataref(std::string name, AbstractDataref *dataref)
-{
-    if(_datarefMap.contains(name))
-    {
-        m_logger.Log("Caution dataref storage already contain a dataref nammed : '" + name + "' overriding");
-    }
-    _datarefMap.emplace(name, dataref);
-    m_logger.Log("Added dataref: '" + name + "' overriding");
-    return _datarefMap.size();
-}
+//std::size_t DatarefManager::AddDataref(std::string name, AbstractDataref *dataref)
+//{
+//    if(m_datarefMap.contains(name))
+//    {
+//        m_logger.Log("Caution dataref storage already contain a dataref nammed : '" + name + "' overriding");
+//    }
+//    m_datarefMap.emplace(name, dataref);
+//    m_logger.Log("Added dataref: '" + name + "' overriding");
+//    return m_datarefMap.size();
+//}
 
-std::size_t  DatarefManager::AddDataref(std::string path, std::string name, std::string conversionFactor, Dataref::Type type)
-{
-    if(_datarefMap.contains(name))
-    {
-        m_logger.Log("Caution dataref storage already contain a dataref nammed : '" + name + "' overriding");
-    }
-    AbstractDataref* dataref;
-    if(path.find(".") != std::string::npos) //it's an FFDataref
-    {
-        dataref = new Dataref();
-        dataref->Load(path);
-        if(type == Dataref::Type::Unknown){
-            ((Dataref*)dataref)->LoadType();
-        }
-        else{
-            ((Dataref*)dataref)->SetType(type);
-        }
-    }
-    _datarefMap.emplace(name, dataref);
-    return _datarefMap.size();
-}
+//std::size_t  DatarefManager::AddDataref(std::string path, std::string name, std::string conversionFactor, Dataref::Type type)
+//{
+//    if(m_datarefMap.contains(name))
+//    {
+//        m_logger.Log("Caution dataref storage already contain a dataref nammed : '" + name + "' overriding");
+//    }
+//    AbstractDataref* dataref;
+//    if(path.find(".") != std::string::npos) //it's an FFDataref
+//    {
+//        dataref = new Dataref();
+//        dataref->Load(path);
+//        if(type == Dataref::Type::Unknown){
+//            ((Dataref*)dataref)->LoadType();
+//        }
+//        else{
+//            ((Dataref*)dataref)->SetType(type);
+//        }
+//    }
+//    m_datarefMap.emplace(name, dataref);
+//    return m_datarefMap.size();
+//}
 
 AbstractDataref *DatarefManager::GetDatarefByName(std::string name)
 {
-    if(!_datarefMap.contains(name))
-    {
-        m_logger.Log("dataref nammed: '" + name + "' NOT FOUND!");
-        return nullptr;
-    }
-    return _datarefMap.at(name);
+    AbstractDataref* dataref = nullptr;
+    gLock.lock();
+        if(!m_datarefMap.contains(name))
+        {
+            m_logger.Log("dataref nammed: '" + name + "' NOT FOUND!");
+        }
+        else 
+        {
+            AbstractDataref* dataref = m_datarefMap.at(name);
+        }
+    gLock.unlock();
+    return dataref;
+}
+
+void DatarefManager::AddDatarefToMap(std::string name, AbstractDataref* dataref)
+{
+    gLock.lock();
+        m_datarefMap.emplace(name, dataref);
+    gLock.unlock();
 }
 
 void DatarefManager::AddMessageToQueue(Message m)
@@ -240,7 +377,7 @@ Logger DatarefManager::GetLogger()
 
 bool DatarefManager::isFF320Api()
 {
-    return _isFF320Enable;
+    return m_isFF320Enable;
 }
 
 SharedValuesInterface* DatarefManager::GetFF320Interface()

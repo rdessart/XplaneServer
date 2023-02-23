@@ -33,7 +33,7 @@ void Logger::SetModuleName(std::string module)
 	m_module = module;
 }
 
-void Logger::Log(std::string message, Logger::Severity severity)
+void Logger::Log(std::string message, Logger::Severity severity) const
 {
 	if (m_logfile == nullptr || m_logfile->fail())
 	{
@@ -48,7 +48,7 @@ void Logger::Log(std::string message, Logger::Severity severity)
 	m_logfile->flush();
 }
 
-const char* Logger::CurrentDateTime()
+const char* Logger::CurrentDateTime() const
 {
 	struct tm* ltm;
 	time_t now = time(0);
@@ -74,7 +74,7 @@ void Logger::operator+=(const std::string& message)
 	Log(message);
 }
 
-std::string Logger::getSeverityStr(Logger::Severity severity)
+std::string Logger::getSeverityStr(Logger::Severity severity) const
 {
 	switch (severity)
 	{

@@ -32,9 +32,9 @@ public:
 	bool Load(std::string path);
 	FFDataref::Type GetType();
 	FFDataref::Type LoadType();
-	std::string GetValue();
+	std::string GetValue() const;
 	// ATTENTION this would set the target value (value to be set at the next call of the callback)
-	void SetValue(std::string value);
+	void SetValue(std::string value) const;
 #pragma region disabled
 	//void SetTargetValue(); // to be called into the sync loop
 #pragma endregion
@@ -50,6 +50,7 @@ public:
 	bool NeedUpdate() const;
 	XPLMDataRef GetNativeDataref();
 	void FromJson(json data);
+	json ToJson() const;
 protected:
 	bool m_needUpdate;
 	std::string m_targetValue;
@@ -59,7 +60,7 @@ protected:
 	std::string m_conversionFactor;
 	SharedValuesInterface* m_ffapi;
 	Logger m_logger;
-	void* m_buffer;
+	//void* m_buffer;
 };
 
 static std::map<std::string, FFDataref::Type> const FFStringToType{

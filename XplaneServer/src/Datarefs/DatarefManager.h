@@ -24,13 +24,14 @@ void Callback(double step, void* tag);
 class DatarefManager{
 public:
     DatarefManager(bool enableFlightFactorAPI=false);
-    std::size_t AddDataref(std::string name, AbstractDataref* dataref);
-    std::size_t AddDataref(std::string path,
-                   std::string name, 
-                   std::string conversionFactor = "1.0", 
-                   Dataref::Type type = Dataref::Type::Unknown);
+    //std::size_t AddDataref(std::string name, AbstractDataref* dataref);
+    //std::size_t AddDataref(std::string path,
+    //               std::string name, 
+    //               std::string conversionFactor = "1.0", 
+    //               Dataref::Type type = Dataref::Type::Unknown);
 
     AbstractDataref* GetDatarefByName(std::string name);
+    void AddDatarefToMap(std::string name, AbstractDataref* dataref);
     void AddMessageToQueue(Message m);
     Message GetNextMessage();
     std::size_t GetMessageQueueLenght();
@@ -44,9 +45,9 @@ public:
 
 protected:
     Logger m_logger = Logger("XPLMServer.log", "DatarefManager", false);
-    std::map<std::string, AbstractDataref*> _datarefMap;
+    std::map<std::string, AbstractDataref*> m_datarefMap;
     SharedValuesInterface* m_ff320;
-    bool _isFF320Enable = false;
+    bool m_isFF320Enable = false;
     std::queue<Message> m_messageQueue;
     std::queue<Message> m_messageOutQueue;
     std::mutex gLock;

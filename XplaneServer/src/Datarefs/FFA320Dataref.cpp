@@ -51,7 +51,7 @@ FFDataref::Type FFDataref::LoadType()
 	return m_type;
 }
 
-std::string FFDataref::GetValue()
+std::string FFDataref::GetValue() const
 {
 	m_logger.Log("FFDATAREF GetValue");
 	if (m_ffapi == nullptr) {
@@ -122,7 +122,7 @@ std::string FFDataref::GetValue()
 		void* buffer = malloc(sizeof(char));
 		m_ffapi->ValueGet(m_id, buffer);
 		auto str = (char*)malloc(lenght + 1);
-		memset(str, 0x00, lenght + 1);
+		memset(str, 0x00, static_cast<size_t>(lenght+ 1));
 #ifdef IBM
 		memcpy_s(str, lenght, buffer, lenght);
 #else
@@ -144,7 +144,7 @@ std::string FFDataref::GetValue()
 //	m_needUpdate = true;
 //}
 
-void FFDataref::SetValue(std::string value)
+void FFDataref::SetValue(std::string value) const
 {
 	m_logger.Log("[DO_SET_VALUE]" + m_link + " Setting value to " + value);
 	int type = m_ffapi->ValueType(m_id);
@@ -219,6 +219,21 @@ void FFDataref::FromJson(json data)
 		std::string value = ExtractValueJson(data["Value"]);
 		this->SetValue(value);
 	}
+}
+
+json FFDataref::ToJson() const
+{
+	json j = json();
+	j["Type"] = m_type;
+	j["FFId"] = m_id;
+	j["FFName"] = GetName();
+	j["FFDescription"] = GetDescription();
+	j["FFFlag"] = GetFlag();
+	j["FFUnit"] = GetUnit();
+	j["Link"] = m_link;
+	j["ConversionFactor"] = m_conversionFactor;
+	j["Value"] = GetValue();
+	return j;
 }
 
 void FFDataref::BindAPI(SharedValuesInterface* FF_A320_api)

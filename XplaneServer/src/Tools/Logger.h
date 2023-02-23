@@ -26,11 +26,11 @@ public:
 	~Logger();
 	std::string GetModuleName();
 	void SetModuleName(std::string module);
-	virtual void Log(std::string message, Logger::Severity severity = Logger::Severity::DEBUG);
-	const char* CurrentDateTime();
+	virtual void Log(std::string message, Logger::Severity severity = Logger::Severity::DEBUG) const;
+	const char* CurrentDateTime() const;
 	void operator+=(const std::string& message);
 protected:
-	std::string getSeverityStr(Logger::Severity severity);
+	std::string getSeverityStr(Logger::Severity severity) const;
 	std::string m_module;
 	std::ofstream* m_logfile;
 };

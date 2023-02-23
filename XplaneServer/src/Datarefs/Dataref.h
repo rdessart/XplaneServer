@@ -59,18 +59,18 @@ public:
 	///Dataref is not null and XPLMCanWriteDataRef() return true.]]>
 	///</summary>
 	///<returns>True if dataref is not readonly</returns>
-	bool CanWrite();
+	bool CanWrite() const;
 	///<summary>
 	///Check if the dataref is accessible:
 	///Dataref is not null and XPLMIsDataRefGood() return true.
 	///</summary>
 	///<returns>True if dataref is valid</returns>
-	bool IsGood();
+	bool IsGood() const;
 	///<summary>
 	///Return the type of the dataref stored in memory
 	///</summary>
 	///<returns>Dataref::Type</returns>
-	Dataref::Type GetType();
+	Dataref::Type GetType() const;
 	///<summary>
 	/// Ask X-Plane SDK to return the type of the dataref
 	///</summary>
@@ -90,26 +90,27 @@ public:
 	/// Return the current value of the dataref (JSON formated).
 	///</summary>
 	///<returns>The value of the dataref as JSON</returns>
-	std::string GetValue();
+	std::string GetValue() const;
 	///<summary>
 	/// Send a new value to the dataref.
 	///</summary>
 	///<param name="value">The value to be sent to the dataref (as JSON)</param>
-	void SetValue(std::string value);
+	void SetValue(std::string value) const;
 	///<summary>
 	/// Set a conversion factor to a dataref.
 	///</summary>
 	///<param name="conversionFactor">The multiplication factor to be applied to the dataref on get and set (as a division)</param>
 	void SetConversionFactor(std::string conversionFactor);
 	void FromJson(json data);
+	json ToJson() const;
 protected:
 	XPLMDataRef m_dataref;	/* Represent a void pointer locating the dataref as X - Plane SDK */
 	Dataref::Type m_type;	/* Represent the underlying data type of the dataref */
 	Logger m_logger;		/* The logger */
 	std::string m_link;
 	std::string m_conversionFactor;
-	int setFloatArrayFromJson(int offset, std::string value);
-	int setIntArrayFromJson(int offset, std::string value);
+	int setFloatArrayFromJson(int offset, std::string value) const;
+	int setIntArrayFromJson(int offset, std::string value) const;
 };
 
 
