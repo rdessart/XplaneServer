@@ -46,9 +46,11 @@ int UDPServer::Initalize()
 
 int UDPServer::SendMessage(Message message)
 {
+    std::string text = message.message.dump();
+    m_logger.Log("Sending ' :" + text + "'!", Logger::Severity::DEBUG);
     return sendto(_socket, 
-        message.message.dump().c_str(), 
-        static_cast<int>(message.message.dump().length()), 
+        text.c_str(),
+        static_cast<int>(text.length()),
         0,
         (sockaddr*)&message.target,
         static_cast<int>(message.target_lenght));
