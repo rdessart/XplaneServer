@@ -140,15 +140,35 @@ void Callback(double step, void* tag)
                 m.message["Result"] = "Error:Missing 'Value' field";
                 break;
             }
-
-            AbstractDataref* d = cm->GetDatarefByName(m.message.value("Name", ""));
-            if (d == nullptr) {
-                m.message["Result"] = "Error:Dataref not in map !";
+            if (m.message["Name"].type() == json::value_t::object)
+            {
+                auto values = json::array();
+                for(auto it = m.message["Name"].begin(); it != m.message["Name"].end(); ++it)
+                {
+                    AbstractDataref* d = cm->GetDatarefByName(it.key());
+                    if (d == nullptr) {
+                        m.message["Result"] = "Error:Dataref not in map !";
+                        break;
+                    }
+                    d->SetValue(it.value());
+                    values.push_back(d->GetValue());
+                }
+                m.message["Value"] = values;
+            }
+            else if (m.message["Name"].type() == json::value_t::array && m.message["Value"].type() != json::value_t::array)
+            {
+                m.message["Result"] = "Error:Name is an array but value is a single element";
                 break;
             }
-            d->SetValue(m.message.value("Value", ""));
-
-            m.message["Value"] = d->GetValue();
+            else {
+                AbstractDataref* d = cm->GetDatarefByName(m.message.value("Name", ""));
+                if (d == nullptr) {
+                    m.message["Result"] = "Error:Dataref not in map !";
+                    break;
+                }
+                d->SetValue(m.message.value("Value", ""));
+                m.message["Value"] = d->GetValue();
+            }
             m.message["Result"] = "Ok";
             break;
         }
@@ -162,16 +182,18 @@ void Callback(double step, void* tag)
             }
             if (m.message["Name"].type() == json::value_t::array)
             {
-                m.message["Value"] = json::array();
+                m.message["Value"] = json();
                 for (auto it : m.message["Name"])
                 {
-                    AbstractDataref* d = cm->GetDatarefByName(it.get<std::string>());
+                    std::string name = it.get<std::string>();
+                    AbstractDataref* d = cm->GetDatarefByName(name);
                     if (d == nullptr) {
                         m.message["Result"] = "Error:Dataref not in map !";
                         break;
                     }
-                    m.message["Value"].push_back(d->GetValue());
+                    m.message["Value"].push_back({ name, d->GetValue() });
                 }
+                m.message.erase("Name");
             }
             else {
                 AbstractDataref* d = cm->GetDatarefByName(m.message.value("Name", ""));
@@ -312,6 +334,11 @@ AbstractDataref *DatarefManager::GetDatarefByName(std::string name)
 void DatarefManager::AddDatarefToMap(std::string name, AbstractDataref* dataref)
 {
     gLock.lock();
+        if(m_datarefMap.contains(name))
+        {
+            auto d = m_datarefMap.find(name);
+            m_datarefMap.erase(d);
+        }
         m_datarefMap.emplace(name, dataref);
     gLock.unlock();
 }
