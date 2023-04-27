@@ -160,14 +160,27 @@ void Callback(double step, void* tag)
                 m.message["Result"] = "Error:Missing 'Name' field";
                 break;
             }
-
-            AbstractDataref* d = cm->GetDatarefByName(m.message.value("Name", ""));
-            if (d == nullptr) {
-                m.message["Result"] = "Error:Dataref not in map !";
-                break;;
+            if (m.message["Name"].type() == json::value_t::array)
+            {
+                m.message["Value"] = json::array();
+                for (auto it : m.message["Name"])
+                {
+                    AbstractDataref* d = cm->GetDatarefByName(it.get<std::string>());
+                    if (d == nullptr) {
+                        m.message["Result"] = "Error:Dataref not in map !";
+                        break;
+                    }
+                    m.message["Value"].push_back(d->GetValue());
+                }
             }
-
-            m.message["Value"] = d->GetValue();
+            else {
+                AbstractDataref* d = cm->GetDatarefByName(m.message.value("Name", ""));
+                if (d == nullptr) {
+                    m.message["Result"] = "Error:Dataref not in map !";
+                    break;;
+                }
+                m.message["Value"] = d->GetValue();
+            }
             m.message["Result"] = "Ok";
             break;
         }
