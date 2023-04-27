@@ -110,6 +110,8 @@ void Callback(double step, void* tag)
                 break;
             }
             std::string link = m.message["Dataref"]["Link"].get<std::string>();
+            std::string name = m.message["Name"].get<std::string>();
+            cm->GetLogger().Log("Adding : '" + name + std::string("'"));
             AbstractDataref* d;
             if (cm->isFF320Api() &&
                 link.find("Aircraft") != std::string::npos &&
@@ -121,9 +123,8 @@ void Callback(double step, void* tag)
                 d = new Dataref();
             }
             d->FromJson(m.message["Dataref"]);
-            cm->AddDatarefToMap(m.message["Name"], d);
+            cm->AddDatarefToMap(name, d);
             m.message["Result"] = "Ok";
-            cm->AddMessageToOutQueue(m);
             break;
         }
         case OperationsEnum::SetRegData:
@@ -149,7 +150,6 @@ void Callback(double step, void* tag)
 
             m.message["Value"] = d->GetValue();
             m.message["Result"] = "Ok";
-            cm->AddMessageToOutQueue(m);
             break;
         }
         case OperationsEnum::GetRegData:
@@ -169,7 +169,6 @@ void Callback(double step, void* tag)
 
             m.message["Value"] = d->GetValue();
             m.message["Result"] = "Ok";
-            cm->AddMessageToOutQueue(m);
             break;
         }
         case OperationsEnum::GetDatarefInfo: 
@@ -192,7 +191,6 @@ void Callback(double step, void* tag)
             }
             d->FromJson(m.message["Dataref"]);
             m.message["Dataref"] = d->ToJson();
-            cm->AddMessageToOutQueue(m);
             break;
         }
         case OperationsEnum::GetRegDatarefInfo:
@@ -315,7 +313,7 @@ void DatarefManager::AddMessageToQueue(Message m)
 Message DatarefManager::GetNextMessage()
 {
     gLock.lock();
-        Message message = m_messageQueue.back();
+        Message message = m_messageQueue.front();
         m_messageQueue.pop();
     gLock.unlock();
     return message;
@@ -332,7 +330,7 @@ std::size_t DatarefManager::GetMessageQueueLenght()
 Message DatarefManager::GetNextMessageOut()
 {
     gLock.lock();
-        Message message = m_messageOutQueue.back();
+        Message message = m_messageOutQueue.front();
         m_messageOutQueue.pop();
     gLock.unlock();
     return message;
